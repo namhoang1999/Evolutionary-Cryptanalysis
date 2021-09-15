@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MaxMinUpdateRule.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.co.ant</a> &gt; <span class="el_source">MaxMinUpdateRule.java</span></div><h1>MaxMinUpdateRule.java</h1><pre class="source lang-java linenums">/*
+  Copyright 2019 by Sean Luke
+  Licensed under the Academic Free License version 3.0
+  See the file &quot;LICENSE&quot; for more information
+*/
+package ec.co.ant;
+
+import ec.EvolutionState;
+import ec.Individual;
+import ec.Subpopulation;
+import ec.co.Component;
+import ec.co.ConstructiveIndividual;
+import ec.co.ConstructiveProblemForm;
+import ec.util.Parameter;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * A &quot;global&quot; pheromone update rule for MaxMin ant.
+ *
+ * Either the best ant of the run (&lt;code&gt;GLOBAL_BEST&lt;/code&gt;) or best of the generation (&lt;code&gt;ITERATION_BEST&lt;/code&gt;)
+ * is chosen according to &lt;code&gt;base.best-strategy&lt;/code&gt; and used to deposit pheromones.
+ *
+ * @author Javier A. Hilty
+ */
+<span class="nc bnc" id="L26" title="All 2 branches missed.">public class MaxMinUpdateRule implements UpdateRule {</span>
+    final public static String P_RHO = &quot;rho&quot;;
+    final public static String P_BEST_STRATEGY = &quot;best-strategy&quot;;
+    public final static String P_MAX = &quot;max-value&quot;;
+    public final static String P_MIN = &quot;min-value&quot;;
+    public final static String P_DECAY_RATE = &quot;decay-rate&quot;;
+
+<span class="nc" id="L33">    public enum BestStrategy { GLOBAL_BEST, ITERATION_BEST };</span>
+    private BestStrategy bestStrategy;
+    private double decayRate;
+    private double rho;
+    private double max;
+    private double min;
+
+    private ConstructiveIndividual best;
+
+<span class="nc" id="L42">    public BestStrategy getBestStrategy() { return bestStrategy; }</span>
+
+<span class="nc" id="L44">    public double getRho() { return rho; }</span>
+
+    @Override
+    public void setup(final EvolutionState state, final Parameter base)
+    {
+<span class="nc bnc" id="L49" title="All 4 branches missed.">        assert(state != null);</span>
+<span class="nc bnc" id="L50" title="All 4 branches missed.">        assert(base != null);</span>
+<span class="nc" id="L51">        rho = state.parameters.getDouble(base.push(P_RHO), null, 0.0);</span>
+<span class="nc" id="L52">        max = state.parameters.getDouble(base.push(P_MAX),null,0.0);</span>
+<span class="nc" id="L53">        min = state.parameters.getDouble(base.push(P_MIN),null,0.0);</span>
+<span class="nc" id="L54">        decayRate = state.parameters.getDouble(base.push(P_DECAY_RATE), null);</span>
+<span class="nc" id="L55">        String bestString = state.parameters.getString(base.push(P_BEST_STRATEGY), null);</span>
+        try
+        {
+<span class="nc" id="L58">            bestString = bestString.replace('-', '_');</span>
+<span class="nc" id="L59">            bestStrategy = BestStrategy.valueOf(bestString);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if(min &gt;= max ){</span>
+<span class="nc" id="L61">                state.output.fatal(&quot;Max must be greater than min&quot;);</span>
+            }
+        }
+<span class="nc" id="L64">        catch (final NullPointerException e)</span>
+        {
+<span class="nc" id="L66">            state.output.fatal(String.format(&quot;%s: invalid value '%s' found for parameter '%s'.  Allowed values are %s.&quot;, this.getClass().getSimpleName(), bestString, base.push(P_BEST_STRATEGY), Arrays.asList(BestStrategy.values())));</span>
+        }
+<span class="nc" id="L68">        catch (final IllegalArgumentException e)</span>
+        {
+<span class="nc" id="L70">            state.output.fatal(String.format(&quot;%s: invalid value '%s' found for parameter '%s'.  Allowed values are %s.&quot;, this.getClass().getSimpleName(), bestString, base.push(P_BEST_STRATEGY), Arrays.asList(BestStrategy.values())));</span>
+<span class="nc" id="L71">        }</span>
+<span class="nc" id="L72">        best = null; // Clear best individual</span>
+<span class="nc bnc" id="L73" title="All 4 branches missed.">        assert(repOK());</span>
+<span class="nc" id="L74">    }</span>
+
+    @Override
+    public void updatePheromones(final EvolutionState state, final PheromoneTable pheromones, final List individuals) {
+<span class="nc bnc" id="L78" title="All 4 branches missed.">        assert(pheromones != null);</span>
+<span class="nc bnc" id="L79" title="All 4 branches missed.">        assert(individuals != null);</span>
+<span class="nc bnc" id="L80" title="All 4 branches missed.">        assert(!individuals.isEmpty());</span>
+
+<span class="nc" id="L82">        decayPheromones(state, pheromones);</span>
+<span class="nc" id="L83">        updateBest(individuals);</span>
+
+<span class="nc bnc" id="L85" title="All 4 branches missed.">        assert(best.size() &gt; 0);</span>
+<span class="nc" id="L86">        final double delta_pheromone = best.fitness.fitness();</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        for (final Object oo : best)</span>
+        {
+<span class="nc bnc" id="L89" title="All 4 branches missed.">            assert(oo instanceof Component);</span>
+<span class="nc" id="L90">            final Component c = (Component) oo;</span>
+
+<span class="nc" id="L92">            final double oldPheromone = pheromones.get(state, c, 0); // Using thread 0 because we are in a single-threaded function</span>
+<span class="nc" id="L93">            pheromones.set(c, (1-rho)*oldPheromone + rho*delta_pheromone);</span>
+<span class="nc" id="L94">        }</span>
+
+<span class="nc bnc" id="L96" title="All 4 branches missed.">        assert(repOK());</span>
+<span class="nc" id="L97">    }</span>
+
+
+    private void updateBest(final List&lt;ConstructiveIndividual&gt; individuals) {
+<span class="nc bnc" id="L101" title="All 4 branches missed.">        assert(individuals != null);</span>
+<span class="nc bnc" id="L102" title="All 4 branches missed.">        assert(!individuals.isEmpty());</span>
+<span class="nc bnc" id="L103" title="All 3 branches missed.">        switch(bestStrategy)</span>
+        {
+            case ITERATION_BEST:
+<span class="nc" id="L106">                best = individuals.get(0);</span>
+                // flowing through to GLOBAL_BEST on purpose!
+
+            case GLOBAL_BEST:
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                for (final Individual ind : individuals) {</span>
+<span class="nc bnc" id="L111" title="All 4 branches missed.">                    if ((best == null) || ind.fitness.betterThan(best.fitness))</span>
+<span class="nc" id="L112">                        best = (ConstructiveIndividual) ind;</span>
+<span class="nc" id="L113">                }</span>
+<span class="nc" id="L114">                break;</span>
+
+            default:
+<span class="nc" id="L117">                throw new IllegalStateException(String.format(&quot;%s: Unrecognized update strategy '%s'.  Please report.&quot;, this.getClass().getSimpleName(), bestStrategy));</span>
+        }
+<span class="nc" id="L119">    }</span>
+
+    public double getDecayRate()
+    {
+<span class="nc" id="L123">        return decayRate;</span>
+    }
+
+    private void decayPheromones(final EvolutionState state, final PheromoneTable pheromones)
+    {
+<span class="nc bnc" id="L128" title="All 4 branches missed.">        assert(state != null);</span>
+<span class="nc bnc" id="L129" title="All 4 branches missed.">        assert(pheromones != null);</span>
+<span class="nc" id="L130">        final List&lt;Component&gt; components = ((ConstructiveProblemForm)state.evaluator.p_problem).getAllComponents();</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        for (final Component c : components) {</span>
+<span class="nc" id="L132">            Double pherVal = (1.0-decayRate)*pheromones.get(state, c, 0);</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            if(pherVal&lt;min)</span>
+<span class="nc" id="L134">                pherVal=min;</span>
+<span class="nc" id="L135">            pheromones.set(c, pherVal); // Using thread 0 because we are in a single-threaded function</span>
+<span class="nc" id="L136">        }</span>
+<span class="nc" id="L137">    }</span>
+
+    public final boolean repOK()
+    {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        return P_RHO != null</span>
+<span class="nc bnc" id="L142" title="All 4 branches missed.">                &amp;&amp; !P_RHO.isEmpty()</span>
+                &amp;&amp; P_BEST_STRATEGY != null
+<span class="nc bnc" id="L144" title="All 4 branches missed.">                &amp;&amp; !P_BEST_STRATEGY.isEmpty()</span>
+                &amp;&amp; bestStrategy != null
+<span class="nc bnc" id="L146" title="All 2 branches missed.">                &amp;&amp; !Double.isInfinite(rho)</span>
+<span class="nc bnc" id="L147" title="All 6 branches missed.">                &amp;&amp; !Double.isNaN(rho)</span>
+                &amp;&amp; rho &gt;= 0.0
+<span class="nc bnc" id="L149" title="All 2 branches missed.">                &amp;&amp; ((best == null) || (best.size() &gt; 0));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

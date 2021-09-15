@@ -1,0 +1,414 @@
+
+Generation: 0
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.03515625 Adjusted=0.9660377358490566 Hits=256
+Tree 0:
+\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[0,2]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\gpbox{Flip}
+
+Generation: 1
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.03515625 Adjusted=0.9660377358490566 Hits=256
+Tree 0:
+\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[0,2]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\gpbox{Flip}
+
+Generation: 2
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.03515625 Adjusted=0.9660377358490566 Hits=256
+Tree 0:
+\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[0,2]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\gpbox{Flip}
+
+Generation: 3
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.03515625 Adjusted=0.9660377358490566 Hits=256
+Tree 0:
+\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[0,2]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\gpbox{Flip}
+
+Generation: 4
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.03515625 Adjusted=0.9660377358490566 Hits=256
+Tree 0:
+\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[0,2]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\gpbox{Flip}
+
+Generation: 5
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.03515625 Adjusted=0.9660377358490566 Hits=256
+Tree 0:
+\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[0,2]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\gpbox{Flip}
+
+Generation: 6
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 7
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 8
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 9
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 10
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 11
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 12
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 13
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 14
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 15
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.028564453125 Adjusted=0.9722288155708522 Hits=585
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{ADF1}}\chunk{\gpbox{[1,0]}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{NextP}}\chunk{\begin{bundle}{\gpbox{NextR}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}
+
+Generation: 16
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 17
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 18
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 19
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 20
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 21
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 22
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 23
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 24
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 25
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 26
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.0234375 Adjusted=0.9770992366412213 Hits=2340
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{NextP}}\chunk{\gpbox{[0,0]}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 27
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.017578125 Adjusted=0.982725527831094 Hits=300
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 28
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.017578125 Adjusted=0.982725527831094 Hits=300
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 29
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.017578125 Adjusted=0.982725527831094 Hits=300
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 30
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.017578125 Adjusted=0.982725527831094 Hits=300
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Generation: 31
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.017578125 Adjusted=0.982725527831094 Hits=300
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}
+
+Best Individual of Run:
+Subpopulation 0:
+Evaluated: true
+Fitness: Standardized=0.017578125 Adjusted=0.982725527831094 Hits=300
+Tree 0:
+\begin{bundle}{\gpbox{ADF1}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{Flip}}\end{bundle}}\end{bundle}
+Tree 1:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,0]}}\chunk{\gpbox{Flip}}\end{bundle}
+Tree 2:
+\begin{bundle}{\gpbox{progn2}}\chunk{\gpbox{[1,1]}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{progn2}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{[0,0]}}\end{bundle}}\end{bundle}}\chunk{\begin{bundle}{\gpbox{Frog}}\chunk{\gpbox{ADF0}}\end{bundle}}\end{bundle}}\end{bundle}
+
+
+Best Individual's Map
+=====================
+Individual's Index: 2340
+Individual's Bias: 0.01171875
+input U: 0
+input V: 0
+SBox Positions: [9, 2, 4]
+
+-------------
+|x |  |  |x |
+-------------
+|  |  |x |  |
+-------------
+|  |x |  |  |
+-------------
+
+Null count: 111

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwapMutation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.gaevolve</a> &gt; <span class="el_source">SwapMutation.java</span></div><h1>SwapMutation.java</h1><pre class="source lang-java linenums">/*
+  Copyright 2006 by Sean Luke
+  Licensed under the Academic Free License version 3.0
+  See the file &quot;LICENSE&quot; for more information
+*/
+
+
+package ec.app.gaevolve;
+import ec.vector.*;
+import ec.*;
+import ec.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+/*
+ * OurMutatorPipeline.java
+ */
+
+/**
+   OurMutatorPipeline is a BreedingPipeline which negates the sign of genes.
+   The individuals must be BitVectorIndividuals.  Because we're lazy,
+   we'll use the individual's species' mutation-probability parameter to tell
+   us whether or not to mutate a given gene.
+ 
+   &lt;p&gt;&lt;b&gt;Typical Number of Individuals Produced Per &lt;tt&gt;produce(...)&lt;/tt&gt; call&lt;/b&gt;&lt;br&gt;
+   (however many its source produces)
+
+   &lt;p&gt;&lt;b&gt;Number of Sources&lt;/b&gt;&lt;br&gt;
+   1
+*/
+
+
+<span class="nc" id="L34">public class SwapMutation extends BreedingPipeline</span>
+    {
+    public static final String P_OURMUTATION = &quot;swap-mutation&quot;;
+
+    // We have to specify a default base, even though we never use it 
+<span class="nc" id="L39">    public Parameter defaultBase() { return VectorDefaults.base().push(P_OURMUTATION); }</span>
+    
+    int genomeLength;
+    public void setup(final EvolutionState state, final Parameter base) {
+<span class="nc" id="L43">        super.setup(state,base);</span>
+        
+<span class="nc" id="L45">        genomeLength = state.parameters.getInt(new Parameter(&quot;pop.subpop.0.species.genome-size&quot;),null,1);</span>
+<span class="nc" id="L46">    }</span>
+
+    public static final int NUM_SOURCES = 1;
+
+    // Return 1 -- we only use one source
+<span class="nc" id="L51">    public int numSources() { return NUM_SOURCES; }</span>
+
+    // We're supposed to create a most _max_ and at least _min_ individuals,
+    // drawn from our source and mutated, and stick them into slots in inds[]
+    // starting with the slot inds[start].  Let's do this by telling our 
+    // source to stick those individuals into inds[] and then mutating them
+    // right there.
+    public int produce(final int min,
+        final int max,
+        final int subpopulation,
+        final ArrayList&lt;Individual&gt; inds,
+        final EvolutionState state,
+        final int thread, HashMap&lt;String, Object&gt; misc)
+        {
+<span class="nc" id="L65">        int start = inds.size();</span>
+        
+        // grab individuals from our source and stick 'em right into inds.
+        // we'll modify them from there
+<span class="nc" id="L69">        int n = sources[0].produce(min,max,subpopulation,inds, state,thread, misc);</span>
+
+        // should we bother?
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (!state.random[thread].nextBoolean(likelihood))</span>
+            {
+<span class="nc" id="L74">            return n;</span>
+            }
+
+        // Check to make sure that the individuals are BitVectorIndividuals and
+        // grab their species.  For efficiency's sake, we assume that all the 
+        // individuals in inds[] are the same type of individual and that they all
+        // share the same common species -- this is a safe assumption because they're 
+        // all breeding from the same subpopulation.
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (!(inds.get(start) instanceof BitVectorIndividual)) // uh oh, wrong kind of individual</span>
+<span class="nc" id="L84">            state.output.fatal(&quot;OurMutatorPipeline didn't get an BitVectorIndividual.&quot; +</span>
+<span class="nc" id="L85">                &quot;The offending individual is in subpopulation &quot; + subpopulation + &quot; and it's:&quot; + inds.get(start));</span>
+<span class="nc" id="L86">        BitVectorSpecies species = (BitVectorSpecies)(inds.get(start).species);</span>
+
+<span class="nc" id="L88">        System.out.println(genomeLength + &quot;&lt;---&quot;);</span>
+<span class="nc" id="L89">        int diff = Math.abs((state.random[thread].nextInt())%(genomeLength-2));</span>
+        // mutate 'em!
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        for(int q=start;q&lt;n+start;q++)</span>
+            {
+<span class="nc" id="L93">            BitVectorIndividual i = (BitVectorIndividual)inds.get(q);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            for(int x=0;x&lt;i.genome.length;x++)</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                if (state.random[thread].nextBoolean(species.mutationProbability(x))) {</span>
+<span class="nc" id="L96">                    boolean t = i.genome[x]; </span>
+<span class="nc" id="L97">                    i.genome[x] = i.genome[(x+diff)%(genomeLength-1)];</span>
+<span class="nc" id="L98">                    i.genome[(x+diff)%(genomeLength-1)] = t;</span>
+                }
+            // it's a &quot;new&quot; individual, so it's no longer been evaluated
+<span class="nc" id="L101">            i.evaluated=false;</span>
+            }
+
+<span class="nc" id="L104">        return n;</span>
+        }
+
+    }
+    
+    
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

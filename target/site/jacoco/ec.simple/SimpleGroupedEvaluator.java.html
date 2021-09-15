@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimpleGroupedEvaluator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.simple</a> &gt; <span class="el_source">SimpleGroupedEvaluator.java</span></div><h1>SimpleGroupedEvaluator.java</h1><pre class="source lang-java linenums">/*
+  Copyright 2020 by Sean Luke
+  Licensed under the Academic Free License version 3.0
+  See the file &quot;LICENSE&quot; for more information
+*/
+
+package ec.simple;
+
+import java.util.ArrayList;
+
+import ec.EvolutionState;
+import ec.Individual;
+import ec.Problem;
+import ec.Subpopulation;
+import ec.coevolve.GroupedProblemForm;
+
+/**
+ * 
+ * @author Eric O. Scott &lt;escott8@gmu.edu&gt;
+ */
+<span class="fc" id="L21">public class SimpleGroupedEvaluator extends SimpleEvaluator</span>
+    {
+    private static final long serialVersionUID = 1;
+
+    /** This protected helper function for evaluatePopulation evaluates a chunk
+        of individuals in a subpopulation for a given thread.  We override it here 
+        to modify evaluation so that it sends the entire chunk of individuals to a 
+        GroupedProblemForm all at once (rather than one-by-one).  */
+    @Override
+    protected void evalPopChunk(EvolutionState state, int[] numinds, int[] from, int threadnum, Problem p)
+        {
+<span class="fc" id="L32">            ((ec.Problem)p).prepareToEvaluate(state,threadnum);</span>
+        
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">            if (!(p instanceof GroupedProblemForm))</span>
+<span class="nc" id="L35">            state.output.fatal(&quot;&quot; + this.getClass() + &quot; used, but the Problem is not of GroupedProblemForm&quot;);</span>
+
+<span class="fc" id="L37">            ArrayList&lt;Subpopulation&gt; subpops = state.population.subpops;</span>
+<span class="fc" id="L38">            int len = subpops.size();</span>
+            
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            for(int pop=0;pop&lt;len;pop++)</span>
+                {
+                // start evaluatin'!
+<span class="fc" id="L43">                int fp = from[pop];</span>
+<span class="fc" id="L44">                int upperbound = fp+numinds[pop];</span>
+<span class="fc" id="L45">                ArrayList&lt;Individual&gt; inds = new ArrayList&lt;&gt;(subpops.get(pop).individuals.subList(fp, upperbound));</span>
+<span class="fc" id="L46">                ((GroupedProblemForm)p).evaluate(state, toArray(inds), repeat(true, inds.size()), false, new int[] { pop }, threadnum);</span>
+<span class="fc" id="L47">                state.incrementEvaluations(upperbound - fp);</span>
+                }
+                            
+<span class="fc" id="L50">            ((ec.Problem)p).finishEvaluating(state,threadnum); </span>
+<span class="fc" id="L51">        }</span>
+
+    /** Convert an ArrayList&lt;Individual&gt; to an Individual[] */
+    private static Individual[] toArray(final ArrayList&lt;Individual&gt; inds)
+        {
+<span class="fc" id="L56">            final Individual[] result = new Individual[inds.size()];</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            for (int i = 0; i &lt; inds.size(); i++)</span>
+<span class="fc" id="L58">                result[i] = inds.get(i);</span>
+<span class="fc" id="L59">            return result;</span>
+        }
+
+    /** Repeat a Boolean element `length` times. */
+    private boolean[] repeat(final boolean value, final int length)
+        {
+<span class="fc" id="L65">            final boolean[] array = new boolean[length];</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            for (int i = 0; i &lt; length; i++)</span>
+<span class="fc" id="L67">                array[i] = value;</span>
+<span class="fc" id="L68">            return array;</span>
+        }
+    }
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

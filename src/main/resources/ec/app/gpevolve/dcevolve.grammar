@@ -1,0 +1,3 @@
+<start> ::= <op>
+<op> ::= (Frog <op>) | (NextPosition <op>) | (NextRound <op>) | (Progn2 <op> <op>) 
+<op> ::= (PositoinERC) | (Flip) | (ADF0) | (ADF1 <op>)

@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FloatVectorIndividual.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.vector</a> &gt; <span class="el_source">FloatVectorIndividual.java</span></div><h1>FloatVectorIndividual.java</h1><pre class="source lang-java linenums">package ec.vector;
+
+import ec.*;
+import ec.util.*;
+
+import java.io.*;
+
+/*
+ * FloatVectorIndividual.java
+ * Created: Thu Mar 22 13:13:20 EST 2001
+ */
+
+/**
+ * FloatVectorIndividual is a VectorIndividual whose genome is an array of
+ * floats. Gene values may range from species.mingene(x) to species.maxgene(x),
+ * inclusive. The default mutation method randomizes genes to new values in this
+ * range, with &lt;tt&gt;species.mutationProbability&lt;/tt&gt;. It can also add gaussian
+ * noise to the genes, if so directed in the FloatVectorSpecies. If the gaussian
+ * noise pushes the gene out of range, a new noise value is generated.
+ * 
+ * &lt;p&gt;
+ * &lt;P&gt;&lt;b&gt;From ec.Individual:&lt;/b&gt; 
+ *
+ * &lt;p&gt;In addition to serialization for checkpointing, Individuals may read and write themselves to streams in three ways.
+ *
+ * &lt;ul&gt;
+ * &lt;li&gt;&lt;b&gt;writeIndividual(...,DataOutput)/readIndividual(...,DataInput)&lt;/b&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;This method
+ * transmits or receives an individual in binary.  It is the most efficient approach to sending
+ * individuals over networks, etc.  These methods write the evaluated flag and the fitness, then
+ * call &lt;b&gt;readGenotype/writeGenotype&lt;/b&gt;, which you must implement to write those parts of your 
+ * Individual special to your functions-- the default versions of readGenotype/writeGenotype throw errors.
+ * You don't need to implement them if you don't plan on using read/writeIndividual.
+ *
+ * &lt;li&gt;&lt;b&gt;printIndividual(...,PrintWriter)/readIndividual(...,LineNumberReader)&lt;/b&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;This
+ * approach transmits or receives an indivdual in text encoded such that the individual is largely readable
+ * by humans but can be read back in 100% by ECJ as well.  To do this, these methods will encode numbers
+ * using the &lt;tt&gt;ec.util.Code&lt;/tt&gt; class.  These methods are mostly used to write out populations to
+ * files for inspection, slight modification, then reading back in later on.  &lt;b&gt;readIndividual&lt;/b&gt; reads
+ * in the fitness and the evaluation flag, then calls &lt;b&gt;parseGenotype&lt;/b&gt; to read in the remaining individual.
+ * You are responsible for implementing parseGenotype: the Code class is there to help you.
+ * &lt;b&gt;printIndividual&lt;/b&gt; writes out the fitness and evaluation flag, then calls &lt;b&gt;genotypeToString&lt;/b&gt; 
+ * and printlns the resultant string. You are responsible for implementing the genotypeToString method in such
+ * a way that parseGenotype can read back in the individual println'd with genotypeToString.  The default form
+ * of genotypeToString simply calls &lt;b&gt;toString&lt;/b&gt;, which you may override instead if you like.  The default
+ * form of &lt;b&gt;parseGenotype&lt;/b&gt; throws an error.  You are not required to implement these methods, but without
+ * them you will not be able to write individuals to files in a simultaneously computer- and human-readable fashion.
+ *
+ * &lt;li&gt;&lt;b&gt;printIndividualForHumans(...,PrintWriter)&lt;/b&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;This
+ * approach prints an individual in a fashion intended for human consumption only.
+ * &lt;b&gt;printIndividualForHumans&lt;/b&gt; writes out the fitness and evaluation flag, then calls &lt;b&gt;genotypeToStringForHumans&lt;/b&gt; 
+ * and printlns the resultant string. You are responsible for implementing the genotypeToStringForHumans method.
+ * The default form of genotypeToStringForHumans simply calls &lt;b&gt;toString&lt;/b&gt;, which you may override instead if you like
+ * (though note that genotypeToString's default also calls toString).  You should handle one of these methods properly
+ * to ensure individuals can be printed by ECJ.
+ * &lt;/ul&gt;
+
+ * &lt;p&gt;In general, the various readers and writers do three things: they tell the Fitness to read/write itself,
+ * they read/write the evaluated flag, and they read/write the gene array.  If you add instance variables to
+ * a VectorIndividual or subclass, you'll need to read/write those variables as well.
+ * &lt;b&gt;Default Base&lt;/b&gt;&lt;br&gt;
+ * vector.float-vect-ind
+ * 
+ * @author Liviu Panait
+ * @author Sean Luke and Liviu Panait
+ * @version 2.0
+ */
+
+<span class="nc" id="L68">public class FloatVectorIndividual extends VectorIndividual</span>
+    {
+    private static final long serialVersionUID = 1;
+
+    public static final String P_FloatVectorIndividual = &quot;float-vect-ind&quot;;
+
+    public static final double MAXIMUM_SHORT_IN_FLOAT = 1.6777216E7f;
+
+    public float[] genome;
+
+    public Parameter defaultBase()
+        {
+<span class="nc" id="L80">        return VectorDefaults.base().push(P_FloatVectorIndividual);</span>
+        }
+
+    public Object clone()
+        {
+<span class="nc" id="L85">        FloatVectorIndividual myobj = (FloatVectorIndividual) (super.clone());</span>
+
+        // must clone the genome
+<span class="nc" id="L88">        myobj.genome = (float[]) (genome.clone());</span>
+
+<span class="nc" id="L90">        return myobj;</span>
+        }
+
+    public void setup(final EvolutionState state, final Parameter base)
+        {
+<span class="nc" id="L95">        super.setup(state, base); // actually unnecessary (Individual.setup() is empty)</span>
+
+        // since VectorSpecies set its constraint values BEFORE it called
+        // super.setup(...) [which in turn called our setup(...)], we know that
+        // stuff like genomeSize has already been set...
+
+<span class="nc" id="L101">        Parameter def = defaultBase();</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (!(species instanceof FloatVectorSpecies))</span>
+<span class="nc" id="L104">            state.output.fatal(</span>
+                &quot;FloatVectorIndividual requires a FloatVectorSpecies&quot;,
+                base, def);
+<span class="nc" id="L107">        FloatVectorSpecies s = (FloatVectorSpecies) species;</span>
+
+<span class="nc" id="L109">        genome = new float[s.genomeSize];</span>
+<span class="nc" id="L110">        }</span>
+
+    public void defaultCrossover(EvolutionState state, int thread,
+        VectorIndividual ind)
+        {
+<span class="nc" id="L115">        FloatVectorSpecies s = (FloatVectorSpecies) species;</span>
+<span class="nc" id="L116">        FloatVectorIndividual i = (FloatVectorIndividual) ind;</span>
+        float tmp;
+        int point;
+
+<span class="nc" id="L120">        int len = Math.min(genome.length, i.genome.length);</span>
+<span class="nc bnc" id="L121" title="All 4 branches missed.">        if (len != genome.length || len != i.genome.length)</span>
+<span class="nc" id="L122">            state.output.warnOnce(&quot;Genome lengths are not the same.  Vector crossover will only be done in overlapping region.&quot;);</span>
+
+<span class="nc bnc" id="L124" title="All 9 branches missed.">        switch (s.crossoverType)</span>
+            {
+            case VectorSpecies.C_ONE_POINT:
+                //                point = state.random[thread].nextInt((len / s.chunksize)+1);
+                // we want to go from 0 ... len-1 
+                // so that there is only ONE case of NO-OP crossover, not TWO
+<span class="nc" id="L130">                point = state.random[thread].nextInt((len / s.chunksize));</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                for(int x=0;x&lt;point*s.chunksize;x++)</span>
+                    { 
+<span class="nc" id="L133">                    tmp = i.genome[x];</span>
+<span class="nc" id="L134">                    i.genome[x] = genome[x]; </span>
+<span class="nc" id="L135">                    genome[x] = tmp; </span>
+                    }
+<span class="nc" id="L137">                break;</span>
+            case VectorSpecies.C_ONE_POINT_NO_NOP:
+<span class="nc" id="L139">                point = state.random[thread].nextInt((len / s.chunksize) - 1) + 1;  // so it goes from 1 .. len-1</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                for(int x=0;x&lt;point*s.chunksize;x++)</span>
+                    { 
+<span class="nc" id="L142">                    tmp = i.genome[x];</span>
+<span class="nc" id="L143">                    i.genome[x] = genome[x]; </span>
+<span class="nc" id="L144">                    genome[x] = tmp; </span>
+                    }
+<span class="nc" id="L146">                break;</span>
+            case VectorSpecies.C_TWO_POINT: 
+                {
+                //                int point0 = state.random[thread].nextInt((len / s.chunksize)+1);
+                //                point = state.random[thread].nextInt((len / s.chunksize)+1);
+                // we want to go from 0 to len-1
+                // so that the only NO-OP crossover possible is point == point0
+                // example; len = 4
+                // possibilities: a=0 b=0       NOP                             [0123]
+                //                                a=0 b=1       swap 0                  [for 1, 2, 3]
+                //                                a=0 b=2       swap 0, 1               [for 2, 3]
+                //                                a=0 b=3       swap 0, 1, 2    [for 3]
+                //                                a=1 b=1       NOP                             [1230]
+                //                                a=1 b=2       swap 1                  [for 2, 3, 0]
+                //                                a=1 b=3       swap 1, 2               [for 3, 0]
+                //                                a=2 b=2       NOP                             [2301]
+                //                                a=2 b=3       swap 2                  [for 3, 0, 1]
+                //                                a=3 b=3   NOP                         [3012]
+                // All intervals: 0, 01, 012, 0123, 1, 12, 123, 1230, 2, 23, 230, 2301, 3, 30, 301, 3012
+<span class="nc" id="L165">                point = state.random[thread].nextInt((len / s.chunksize));</span>
+<span class="nc" id="L166">                int point0 = state.random[thread].nextInt((len / s.chunksize));</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">                if (point0 &gt; point) { int p = point0; point0 = point; point = p; }</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                for(int x=point0*s.chunksize;x&lt;point*s.chunksize;x++)</span>
+                    {
+<span class="nc" id="L170">                    tmp = i.genome[x];</span>
+<span class="nc" id="L171">                    i.genome[x] = genome[x];</span>
+<span class="nc" id="L172">                    genome[x] = tmp;</span>
+                    }
+                }
+<span class="nc" id="L175">            break;</span>
+            case VectorSpecies.C_TWO_POINT_NO_NOP: 
+                {
+<span class="nc" id="L178">                point = state.random[thread].nextInt((len / s.chunksize));</span>
+<span class="nc" id="L179">                int point0 = 0;</span>
+<span class="nc" id="L180">                do { point0 = state.random[thread].nextInt((len / s.chunksize)); }</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">                while (point0 == point);  // NOP</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                if (point0 &gt; point) { int p = point0; point0 = point; point = p; }</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">                for(int x=point0*s.chunksize;x&lt;point*s.chunksize;x++)</span>
+                    {
+<span class="nc" id="L185">                    tmp = i.genome[x];</span>
+<span class="nc" id="L186">                    i.genome[x] = genome[x];</span>
+<span class="nc" id="L187">                    genome[x] = tmp;</span>
+                    }
+                }
+<span class="nc" id="L190">            break;</span>
+            case VectorSpecies.C_ANY_POINT:
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                for (int x = 0; x &lt; len / s.chunksize; x++)</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                    if (state.random[thread].nextBoolean(s.crossoverProbability))</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                        for (int y = x * s.chunksize; y &lt; (x + 1) * s.chunksize; y++)</span>
+                            {
+<span class="nc" id="L196">                            tmp = i.genome[y];</span>
+<span class="nc" id="L197">                            i.genome[y] = genome[y];</span>
+<span class="nc" id="L198">                            genome[y] = tmp;</span>
+                            }
+<span class="nc" id="L200">                break;</span>
+            case VectorSpecies.C_LINE_RECOMB:
+                {
+<span class="nc" id="L203">                double alpha = state.random[thread].nextFloat(true, true) * (1 + 2*s.lineDistance) - s.lineDistance;</span>
+<span class="nc" id="L204">                double beta = state.random[thread].nextFloat(true, true) * (1 + 2*s.lineDistance) - s.lineDistance;</span>
+                double t,u,min,max;
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                for (int x = 0; x &lt; len; x++)</span>
+                    {
+<span class="nc" id="L208">                    min = s.minGene(x);</span>
+<span class="nc" id="L209">                    max = s.maxGene(x);</span>
+<span class="nc" id="L210">                    t = alpha * genome[x] + (1 - alpha) * i.genome[x];</span>
+<span class="nc" id="L211">                    u = beta * i.genome[x] + (1 - beta) * genome[x];</span>
+<span class="nc bnc" id="L212" title="All 8 branches missed.">                    if (!(t &lt; min || t &gt; max || u &lt; min || u &gt; max))</span>
+                        {
+<span class="nc" id="L214">                        genome[x] = (float)t;</span>
+<span class="nc" id="L215">                        i.genome[x] = (float)u; </span>
+                        }
+                    }
+                }
+<span class="nc" id="L219">            break;</span>
+            case VectorSpecies.C_INTERMED_RECOMB:
+                {
+                double t,u,min,max;
+<span class="nc bnc" id="L223" title="All 2 branches missed.">                for (int x = 0; x &lt; len; x++)</span>
+                    {
+                    do
+                        {
+<span class="nc" id="L227">                        double alpha = state.random[thread].nextFloat(true, true) * (1 + 2*s.lineDistance) - s.lineDistance;</span>
+<span class="nc" id="L228">                        double beta = state.random[thread].nextFloat(true, true) * (1 + 2*s.lineDistance) - s.lineDistance;</span>
+<span class="nc" id="L229">                        min = s.minGene(x);</span>
+<span class="nc" id="L230">                        max = s.maxGene(x);</span>
+<span class="nc" id="L231">                        t = alpha * genome[x] + (1 - alpha) * i.genome[x];</span>
+<span class="nc" id="L232">                        u = beta * i.genome[x] + (1 - beta) * genome[x];</span>
+<span class="nc bnc" id="L233" title="All 8 branches missed.">                        } while (t &lt; min || t &gt; max || u &lt; min || u &gt; max);</span>
+<span class="nc" id="L234">                    genome[x] = (float)t;</span>
+<span class="nc" id="L235">                    i.genome[x] = (float)u; </span>
+                    }
+                }
+<span class="nc" id="L238">            break;</span>
+            case VectorSpecies.C_SIMULATED_BINARY:
+                {
+<span class="nc" id="L241">                simulatedBinaryCrossover(state.random[thread], i, s.crossoverDistributionIndex);</span>
+                }
+<span class="nc" id="L243">            break;</span>
+            default:
+<span class="nc" id="L245">                state.output.fatal(&quot;In FloatVectorIndividual.defaultCrossover, default case occurred when it shouldn't have&quot;);</span>
+                break;
+            }
+<span class="nc" id="L248">        }</span>
+
+    /**
+     * Splits the genome into n pieces, according to points, which *must* be
+     * sorted. pieces.length must be 1 + points.length
+     */
+    public void split(int[] points, Object[] pieces)
+        {
+        int point0, point1;
+<span class="nc" id="L257">        point0 = 0;</span>
+<span class="nc" id="L258">        point1 = points[0];</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">        for (int x = 0; x &lt; pieces.length; x++)</span>
+            {
+<span class="nc" id="L261">            pieces[x] = new float[point1 - point0];</span>
+<span class="nc" id="L262">            System.arraycopy(genome, point0, pieces[x], 0, point1 - point0);</span>
+<span class="nc" id="L263">            point0 = point1;</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">            if (x &gt;= pieces.length - 2)</span>
+<span class="nc" id="L265">                point1 = genome.length;</span>
+            else
+<span class="nc" id="L267">                point1 = points[x + 1];</span>
+            }
+<span class="nc" id="L269">        }</span>
+
+    /** Joins the n pieces and sets the genome to their concatenation. */
+    public void join(Object[] pieces)
+        {
+<span class="nc" id="L274">        int sum = 0;</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        for (int x = 0; x &lt; pieces.length; x++)</span>
+<span class="nc" id="L276">            sum += ((float[]) (pieces[x])).length;</span>
+
+<span class="nc" id="L278">        int runningsum = 0;</span>
+<span class="nc" id="L279">        float[] newgenome = new float[sum];</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        for (int x = 0; x &lt; pieces.length; x++)</span>
+            {
+<span class="nc" id="L282">            System.arraycopy(pieces[x], 0, newgenome, runningsum,</span>
+                ((float[]) (pieces[x])).length);
+<span class="nc" id="L284">            runningsum += ((float[]) (pieces[x])).length;</span>
+            }
+        // set genome
+<span class="nc" id="L287">        genome = newgenome;</span>
+<span class="nc" id="L288">        }</span>
+        
+    /**
+     * Destructively mutates the individual in some default manner. The default
+     * form simply randomizes genes to a uniform distribution from the min and
+     * max of the gene values. It can also add gaussian noise to the genes, if
+     * so directed in the FloatVectorSpecies. If the gaussian noise pushes the
+     * gene out of range, a new noise value is generated.
+     * 
+     * @author Sean Luke, Liviu Panait and Gabriel Balan
+     */
+    public void defaultMutate(EvolutionState state, int thread)
+        {
+<span class="nc" id="L301">        FloatVectorSpecies s = (FloatVectorSpecies) species;</span>
+
+<span class="nc" id="L303">        MersenneTwisterFast rng = state.random[thread];</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">        for(int x = 0; x &lt; genome.length; x++)</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">            if (rng.nextBoolean(s.mutationProbability(x)))</span>
+                {
+<span class="nc" id="L307">                float old = genome[x];</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">                for(int retries = 0; retries &lt; s.duplicateRetries(x) + 1; retries++)</span>
+                    {
+<span class="nc bnc" id="L310" title="All 6 branches missed.">                    switch(s.mutationType(x))</span>
+                        {
+                        case FloatVectorSpecies.C_GAUSS_MUTATION:
+<span class="nc" id="L313">                            gaussianMutation(state, rng, s, x);</span>
+<span class="nc" id="L314">                            break;</span>
+                        case FloatVectorSpecies.C_POLYNOMIAL_MUTATION:
+<span class="nc" id="L316">                            polynomialMutation(state, rng, s, x);</span>
+<span class="nc" id="L317">                            break;</span>
+                        case FloatVectorSpecies.C_RESET_MUTATION:
+<span class="nc" id="L319">                            floatResetMutation(rng, s, x);</span>
+<span class="nc" id="L320">                            break;</span>
+                        case FloatVectorSpecies.C_INTEGER_RESET_MUTATION:
+<span class="nc" id="L322">                            integerResetMutation(rng, s, x);</span>
+<span class="nc" id="L323">                            break;</span>
+                        case FloatVectorSpecies.C_INTEGER_RANDOM_WALK_MUTATION:
+<span class="nc" id="L325">                            integerRandomWalkMutation(rng, s, x);</span>
+<span class="nc" id="L326">                            break;</span>
+                        default:
+<span class="nc" id="L328">                            state.output.fatal(&quot;In FloatVectorIndividual.defaultMutate, default case occurred when it shouldn't have&quot;);</span>
+                            break;
+                        }
+<span class="nc bnc" id="L331" title="All 2 branches missed.">                    if (genome[x] != old) break;</span>
+                    // else genome[x] = old;  // try again
+                    }
+                }
+<span class="nc" id="L335">        }</span>
+        
+    void integerRandomWalkMutation(MersenneTwisterFast random, FloatVectorSpecies species, int index)
+        {
+<span class="nc" id="L339">        double min = species.minGene(index);</span>
+<span class="nc" id="L340">        double max = species.maxGene(index);</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (!species.mutationIsBounded(index))</span>
+            {
+            // okay, technically these are still bounds, but we can't go beyond this without weird things happening
+<span class="nc" id="L344">            max = MAXIMUM_SHORT_IN_FLOAT;</span>
+<span class="nc" id="L345">            min = -(max);</span>
+            }
+        do
+            {
+<span class="nc bnc" id="L349" title="All 2 branches missed.">            int n = (int)(random.nextBoolean() ? 1 : -1);</span>
+<span class="nc" id="L350">            float g = (float)Math.floor(genome[index]);</span>
+<span class="nc bnc" id="L351" title="All 8 branches missed.">            if ((n == 1 &amp;&amp; g &lt; max) ||</span>
+                (n == -1 &amp;&amp; g &gt; min))
+<span class="nc" id="L353">                genome[index] = g + n;</span>
+<span class="nc bnc" id="L354" title="All 8 branches missed.">            else if ((n == -1 &amp;&amp; g &lt; max) ||</span>
+                (n == 1 &amp;&amp; g &gt; min))
+<span class="nc" id="L356">                genome[index] = g - n;     </span>
+            }
+<span class="nc bnc" id="L358" title="All 2 branches missed.">        while (random.nextBoolean(species.randomWalkProbability(index)));</span>
+<span class="nc" id="L359">        }</span>
+
+    void integerResetMutation(MersenneTwisterFast random, FloatVectorSpecies species, int index)
+        {
+<span class="nc" id="L363">        int minGene = (int)Math.floor(species.minGene(index));</span>
+<span class="nc" id="L364">        int maxGene = (int)Math.floor(species.maxGene(index));</span>
+<span class="nc" id="L365">        genome[index] = randomValueFromClosedInterval(minGene, maxGene, random);  // minGene + random.nextLong(maxGene - minGene + 1);</span>
+<span class="nc" id="L366">        }</span>
+
+    void floatResetMutation(MersenneTwisterFast random, FloatVectorSpecies species, int index)
+        {
+<span class="nc" id="L370">        double minGene = species.minGene(index);</span>
+<span class="nc" id="L371">        double maxGene = species.maxGene(index);</span>
+<span class="nc" id="L372">        genome[index] = (float)(minGene + random.nextFloat(true, true) * (maxGene - minGene));</span>
+<span class="nc" id="L373">        }</span>
+    
+    void gaussianMutation(EvolutionState state, MersenneTwisterFast random, FloatVectorSpecies species, int index)
+        {
+        double val;
+<span class="nc" id="L378">        double min = species.minGene(index);</span>
+<span class="nc" id="L379">        double max = species.maxGene(index);</span>
+<span class="nc" id="L380">        double stdev = species.gaussMutationStdev(index);</span>
+<span class="nc" id="L381">        int outOfBoundsLeftOverTries = species.outOfBoundsRetries;</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">        boolean givingUpAllowed = species.outOfBoundsRetries != 0;</span>
+        do
+            {
+<span class="nc" id="L385">            val = random.nextGaussian() * stdev + genome[index];</span>
+<span class="nc" id="L386">            outOfBoundsLeftOverTries--;</span>
+<span class="nc bnc" id="L387" title="All 6 branches missed.">            if (species.mutationIsBounded(index) &amp;&amp; (val &gt; max || val &lt; min))</span>
+                {
+<span class="nc bnc" id="L389" title="All 4 branches missed.">                if (givingUpAllowed &amp;&amp; (outOfBoundsLeftOverTries == 0))</span>
+                    {
+<span class="nc" id="L391">                    val = min + random.nextFloat() * (max - min);</span>
+<span class="nc" id="L392">                    species.outOfRangeRetryLimitReached(state);// it better get inlined</span>
+<span class="nc" id="L393">                    break;</span>
+                    }
+                } 
+            else break;
+            } 
+        while (true);
+<span class="nc" id="L399">        genome[index] = (float)val;</span>
+<span class="nc" id="L400">        }</span>
+    
+    void polynomialMutation(EvolutionState state, MersenneTwisterFast random, FloatVectorSpecies species, int index)
+        {
+<span class="nc" id="L404">        double eta_m = species.mutationDistributionIndex(index);</span>
+<span class="nc" id="L405">        boolean alternativePolynomialVersion = species.polynomialIsAlternative(index);</span>
+        
+        double rnd, delta1, delta2, mut_pow, deltaq;
+        double y, yl, yu, val, xy;
+        double y1;
+
+<span class="nc" id="L411">        y1 = y = genome[index];  // ind[index];</span>
+<span class="nc" id="L412">        yl = species.minGene(index); // min_realvar[index];</span>
+<span class="nc" id="L413">        yu = species.maxGene(index); // max_realvar[index];</span>
+<span class="nc" id="L414">        delta1 = (y-yl)/(yu-yl);</span>
+<span class="nc" id="L415">        delta2 = (yu-y)/(yu-yl);</span>
+
+<span class="nc" id="L417">        int totalTries = species.outOfBoundsRetries;</span>
+<span class="nc" id="L418">        int tries = 0;</span>
+<span class="nc bnc" id="L419" title="All 4 branches missed.">        for(tries = 0; tries &lt; totalTries || totalTries == 0; tries++)  // keep trying until totalTries is reached if it's not zero.  If it's zero, go on forever.</span>
+            {
+<span class="nc" id="L421">            rnd = random.nextFloat();</span>
+<span class="nc" id="L422">            mut_pow = 1.0/(eta_m+1.0);</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">            if (rnd &lt;= 0.5)</span>
+                {
+<span class="nc" id="L425">                xy = 1.0-delta1;</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">                val = 2.0*rnd + (alternativePolynomialVersion ? (1.0-2.0*rnd)*(Math.pow(xy,(eta_m+1.0))) : 0.0);</span>
+<span class="nc" id="L427">                deltaq =  Math.pow(val,mut_pow) - 1.0;</span>
+                }
+            else
+                {
+<span class="nc" id="L431">                xy = 1.0-delta2;</span>
+<span class="nc bnc" id="L432" title="All 2 branches missed.">                val = 2.0*(1.0-rnd) + (alternativePolynomialVersion ? 2.0*(rnd-0.5)*(Math.pow(xy,(eta_m+1.0))) : 0.0);</span>
+<span class="nc" id="L433">                deltaq = 1.0 - (Math.pow(val,mut_pow));</span>
+                }
+<span class="nc" id="L435">            y1 = y + deltaq*(yu-yl);</span>
+<span class="nc bnc" id="L436" title="All 6 branches missed.">            if (!species.mutationIsBounded(index) || (y1 &gt;= yl &amp;&amp; y1 &lt;= yu)) break;  // yay, found one</span>
+            }
+                                                                
+        // at this point, if tries is totalTries, we failed
+<span class="nc bnc" id="L440" title="All 4 branches missed.">        if (totalTries != 0 &amp;&amp; tries == totalTries)</span>
+            {
+            // just randomize
+<span class="nc" id="L443">            y1 = (float)(species.minGene(index) + random.nextFloat(true, true) * (species.maxGene(index) - species.minGene(index)));  //(float)(min_realvar[index] + random.nextFloat() * (max_realvar[index] - min_realvar[index]));</span>
+<span class="nc" id="L444">            species.outOfRangeRetryLimitReached(state);// it better get inlined</span>
+            }
+<span class="nc" id="L446">        genome[index] = (float)y1; // ind[index] = y1;</span>
+<span class="nc" id="L447">        }</span>
+
+    
+    /** This function is broken out to keep it identical to NSGA-II's mutation.c code. eta_m is the distribution
+        index.  */
+    public void polynomialMutate(EvolutionState state, MersenneTwisterFast random, float eta_m, boolean alternativePolynomialVersion, boolean mutationIsBounded)
+        {
+<span class="nc" id="L454">        FloatVectorSpecies s = (FloatVectorSpecies) species;</span>
+<span class="nc" id="L455">        float[] ind = genome;</span>
+        //        double[] min_realvar = s.minGenes;
+        //        double[] max_realvar = s.maxGenes;
+                
+        double rnd, delta1, delta2, mut_pow, deltaq;
+        double y, yl, yu, val, xy;
+        double y1;
+<span class="nc bnc" id="L462" title="All 2 branches missed.">        for (int j=0; j &lt; ind.length; j++)</span>
+            {
+<span class="nc bnc" id="L464" title="All 2 branches missed.">            if (random.nextBoolean(s.mutationProbability[j]))</span>
+                {
+<span class="nc" id="L466">                y1 = y = ind[j];</span>
+<span class="nc" id="L467">                yl = s.minGene(j); //min_realvar[j];</span>
+<span class="nc" id="L468">                yu = s.maxGene(j); //max_realvar[j];</span>
+<span class="nc" id="L469">                delta1 = (y-yl)/(yu-yl);</span>
+<span class="nc" id="L470">                delta2 = (yu-y)/(yu-yl);</span>
+
+<span class="nc" id="L472">                int totalTries = s.outOfBoundsRetries;</span>
+<span class="nc" id="L473">                int tries = 0;</span>
+<span class="nc bnc" id="L474" title="All 4 branches missed.">                for(tries = 0; tries &lt; totalTries || totalTries == 0; tries++)  // keep trying until totalTries is reached if it's not zero.  If it's zero, go on forever.</span>
+                    {
+<span class="nc" id="L476">                    rnd = (random.nextFloat());</span>
+<span class="nc" id="L477">                    mut_pow = 1.0/(eta_m+1.0);</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">                    if (rnd &lt;= 0.5)</span>
+                        {
+<span class="nc" id="L480">                        xy = 1.0-delta1;</span>
+<span class="nc bnc" id="L481" title="All 2 branches missed.">                        val = 2.0*rnd + (alternativePolynomialVersion ? (1.0-2.0*rnd)*(Math.pow(xy,(eta_m+1.0))) : 0.0);</span>
+<span class="nc" id="L482">                        deltaq =  Math.pow(val,mut_pow) - 1.0;</span>
+                        }
+                    else
+                        {
+<span class="nc" id="L486">                        xy = 1.0-delta2;</span>
+<span class="nc bnc" id="L487" title="All 2 branches missed.">                        val = 2.0*(1.0-rnd) + (alternativePolynomialVersion ? 2.0*(rnd-0.5)*(Math.pow(xy,(eta_m+1.0))) : 0.0);</span>
+<span class="nc" id="L488">                        deltaq = 1.0 - (Math.pow(val,mut_pow));</span>
+                        }
+<span class="nc" id="L490">                    y1 = y + deltaq*(yu-yl);</span>
+<span class="nc bnc" id="L491" title="All 6 branches missed.">                    if (!mutationIsBounded || (y1 &gt;= yl &amp;&amp; y1 &lt;= yu)) break;  // yay, found one</span>
+                    }
+                                        
+                // at this point, if tries is totalTries, we failed
+<span class="nc bnc" id="L495" title="All 4 branches missed.">                if (totalTries != 0 &amp;&amp; tries == totalTries)</span>
+                    {
+                    // just randomize
+                    // y1 = (float)(min_realvar[j] + random.nextFloat(true, true) * (max_realvar[j] - min_realvar[j]));
+<span class="nc" id="L499">                    y1 = (float)(s.minGene(j) + random.nextFloat(true, true) * (s.maxGene(j) - s.minGene(j)));</span>
+<span class="nc" id="L500">                    s.outOfRangeRetryLimitReached(state);// it better get inlined</span>
+                    }
+<span class="nc" id="L502">                ind[j] = (float)y1;</span>
+                }
+            }
+<span class="nc" id="L505">        }</span>
+
+
+
+    public void simulatedBinaryCrossover(MersenneTwisterFast random, FloatVectorIndividual other, float eta_c)
+        {
+<span class="nc" id="L511">        final double EPS = FloatVectorSpecies.SIMULATED_BINARY_CROSSOVER_EPS;</span>
+<span class="nc" id="L512">        FloatVectorSpecies s = (FloatVectorSpecies) species;</span>
+<span class="nc" id="L513">        float[] parent1 = genome;</span>
+<span class="nc" id="L514">        float[] parent2 = other.genome;</span>
+        //        double[] min_realvar = s.minGenes;
+        //        double[] max_realvar = s.maxGenes;
+                
+                
+        double y1, y2, yl, yu;
+        double c1, c2;
+        double alpha, beta, betaq;
+        double rand;
+                
+<span class="nc bnc" id="L524" title="All 2 branches missed.">        for(int i = 0; i &lt; parent1.length; i++)</span>
+            {
+<span class="nc bnc" id="L526" title="All 2 branches missed.">            if (random.nextBoolean())  // 0.5f</span>
+                {
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                if (Math.abs(parent1[i] - parent2[i]) &gt; EPS)</span>
+                    {
+<span class="nc bnc" id="L530" title="All 2 branches missed.">                    if (parent1[i] &lt; parent2[i])</span>
+                        {
+<span class="nc" id="L532">                        y1 = parent1[i];</span>
+<span class="nc" id="L533">                        y2 = parent2[i];</span>
+                        }
+                    else
+                        {
+<span class="nc" id="L537">                        y1 = parent2[i];</span>
+<span class="nc" id="L538">                        y2 = parent1[i];</span>
+                        }
+<span class="nc" id="L540">                    yl = s.minGene(i); //min_realvar[i];</span>
+<span class="nc" id="L541">                    yu = s.maxGene(i); //max_realvar[i];    </span>
+<span class="nc" id="L542">                    rand = random.nextFloat();</span>
+<span class="nc" id="L543">                    beta = 1.0 + (2.0*(y1-yl)/(y2-y1));</span>
+<span class="nc" id="L544">                    alpha = 2.0 - Math.pow(beta,-(eta_c+1.0));</span>
+<span class="nc bnc" id="L545" title="All 2 branches missed.">                    if (rand &lt;= (1.0/alpha))</span>
+                        {
+<span class="nc" id="L547">                        betaq = Math.pow((rand*alpha),(1.0/(eta_c+1.0)));</span>
+                        }
+                    else
+                        {
+<span class="nc" id="L551">                        betaq = Math.pow((1.0/(2.0 - rand*alpha)),(1.0/(eta_c+1.0)));</span>
+                        }
+<span class="nc" id="L553">                    c1 = 0.5*((y1+y2)-betaq*(y2-y1));</span>
+<span class="nc" id="L554">                    beta = 1.0 + (2.0*(yu-y2)/(y2-y1));</span>
+<span class="nc" id="L555">                    alpha = 2.0 - Math.pow(beta,-(eta_c+1.0));</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">                    if (rand &lt;= (1.0/alpha))</span>
+                        {
+<span class="nc" id="L558">                        betaq = Math.pow((rand*alpha),(1.0/(eta_c+1.0)));</span>
+                        }
+                    else
+                        {
+<span class="nc" id="L562">                        betaq = Math.pow((1.0/(2.0 - rand*alpha)),(1.0/(eta_c+1.0)));</span>
+                        }
+<span class="nc" id="L564">                    c2 = 0.5*((y1+y2)+betaq*(y2-y1));</span>
+<span class="nc bnc" id="L565" title="All 2 branches missed.">                    if (c1&lt;yl)</span>
+<span class="nc" id="L566">                        c1=yl;</span>
+<span class="nc bnc" id="L567" title="All 2 branches missed.">                    if (c2&lt;yl)</span>
+<span class="nc" id="L568">                        c2=yl;</span>
+<span class="nc bnc" id="L569" title="All 2 branches missed.">                    if (c1&gt;yu)</span>
+<span class="nc" id="L570">                        c1=yu;</span>
+<span class="nc bnc" id="L571" title="All 2 branches missed.">                    if (c2&gt;yu)</span>
+<span class="nc" id="L572">                        c2=yu;</span>
+<span class="nc bnc" id="L573" title="All 2 branches missed.">                    if (random.nextBoolean())</span>
+                        {
+<span class="nc" id="L575">                        parent1[i] = (float)c2;</span>
+<span class="nc" id="L576">                        parent2[i] = (float)c1;</span>
+                        }
+                    else
+                        {
+<span class="nc" id="L580">                        parent1[i] = (float)c1;</span>
+<span class="nc" id="L581">                        parent2[i] = (float)c2;</span>
+                        }
+                    }
+                else
+                    {
+                    // do nothing
+                    }
+                }
+            else
+                {
+                // do nothing
+                }
+            }
+<span class="nc" id="L594">        }</span>
+
+    // for ints
+    int randomValueFromClosedInterval(int min, int max, MersenneTwisterFast random)
+        {
+<span class="nc bnc" id="L599" title="All 2 branches missed.">        if (max - min &lt; 0) // we had an overflow</span>
+            {
+<span class="nc" id="L601">            int l = 0;</span>
+<span class="nc" id="L602">            do l = random.nextInt();</span>
+<span class="nc bnc" id="L603" title="All 4 branches missed.">            while(l &lt; min || l &gt; max);</span>
+<span class="nc" id="L604">            return l;</span>
+            }
+<span class="nc" id="L606">        else return min + random.nextInt(max - min + 1);</span>
+        }
+
+
+    /**
+     * Initializes the individual by randomly choosing floats uniformly from
+     * mingene to maxgene.
+     */
+    public void reset(EvolutionState state, int thread)
+        {
+<span class="nc" id="L616">        FloatVectorSpecies s = (FloatVectorSpecies) species;</span>
+<span class="nc" id="L617">        MersenneTwisterFast random = state.random[thread];</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">        for (int x = 0; x &lt; genome.length; x++)</span>
+            {
+<span class="nc" id="L620">            int type = s.mutationType(x);</span>
+<span class="nc bnc" id="L621" title="All 4 branches missed.">            if (type == FloatVectorSpecies.C_INTEGER_RESET_MUTATION || </span>
+                type == FloatVectorSpecies.C_INTEGER_RANDOM_WALK_MUTATION)  // integer type
+                {
+<span class="nc" id="L624">                int minGene = (int)Math.floor(s.minGene(x));</span>
+<span class="nc" id="L625">                int maxGene = (int)Math.floor(s.maxGene(x));</span>
+<span class="nc" id="L626">                genome[x] = randomValueFromClosedInterval(minGene, maxGene, random); //minGene + random.nextInt(maxGene - minGene + 1);</span>
+<span class="nc" id="L627">                }</span>
+            else
+                {
+<span class="nc" id="L630">                genome[x] = (float)(s.minGene(x) + random.nextDouble(true, true) * (s.maxGene(x) - s.minGene(x)));</span>
+                }
+            }
+<span class="nc" id="L633">        }</span>
+
+    public int hashCode()
+        {
+        // stolen from GPIndividual. It's a decent algorithm.
+<span class="nc" id="L638">        int hash = this.getClass().hashCode();</span>
+
+<span class="nc" id="L640">        hash = (hash &lt;&lt; 1 | hash &gt;&gt;&gt; 31);</span>
+<span class="nc bnc" id="L641" title="All 2 branches missed.">        for (int x = 0; x &lt; genome.length; x++)</span>
+<span class="nc" id="L642">            hash = (hash &lt;&lt; 1 | hash &gt;&gt;&gt; 31) ^ Float.floatToIntBits(genome[x]);</span>
+
+<span class="nc" id="L644">        return hash;</span>
+        }
+
+    public String genotypeToStringForHumans()
+        {
+<span class="nc" id="L649">        StringBuilder s = new StringBuilder();</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">        for( int i = 0 ; i &lt; genome.length ; i++ )</span>
+<span class="nc bnc" id="L651" title="All 2 branches missed.">            { if (i &gt; 0) s.append(&quot; &quot;); s.append(genome[i]); }</span>
+<span class="nc" id="L652">        return s.toString();</span>
+        }
+
+    public String genotypeToString()
+        {
+<span class="nc" id="L657">        StringBuilder s = new StringBuilder();</span>
+<span class="nc" id="L658">        s.append(Code.encode(genome.length));</span>
+<span class="nc bnc" id="L659" title="All 2 branches missed.">        for (int i = 0; i &lt; genome.length; i++)</span>
+<span class="nc" id="L660">            s.append(Code.encode(genome[i]));</span>
+<span class="nc" id="L661">        return s.toString();</span>
+        }
+
+    protected void parseGenotype(final EvolutionState state,
+        final LineNumberReader reader) throws IOException
+        {
+        // read in the next line. The first item is the number of genes
+<span class="nc" id="L668">        String s = reader.readLine();</span>
+<span class="nc" id="L669">        DecodeReturn d = new DecodeReturn(s);</span>
+<span class="nc" id="L670">        Code.decode(d);</span>
+<span class="nc bnc" id="L671" title="All 2 branches missed.">        if (d.type != DecodeReturn.T_INTEGER)  // uh oh</span>
+<span class="nc" id="L672">            state.output.fatal(&quot;Individual with genome:\n&quot; + s + &quot;\n... does not have an integer at the beginning indicating the genome count.&quot;);</span>
+<span class="nc" id="L673">        int lll = (int) (d.l);</span>
+
+<span class="nc" id="L675">        genome = new float[lll];</span>
+
+        // read in the genes
+<span class="nc bnc" id="L678" title="All 2 branches missed.">        for (int i = 0; i &lt; genome.length; i++)</span>
+            {
+<span class="nc" id="L680">            Code.decode(d);</span>
+<span class="nc" id="L681">            genome[i] = (float) (d.d);</span>
+            }
+<span class="nc" id="L683">        }</span>
+
+    public boolean equals(Object ind)
+        {
+<span class="nc bnc" id="L687" title="All 2 branches missed.">        if (ind == null) return false;</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">        if (!(this.getClass().equals(ind.getClass())))</span>
+<span class="nc" id="L689">            return false; // SimpleRuleIndividuals are special.</span>
+<span class="nc" id="L690">        FloatVectorIndividual i = (FloatVectorIndividual) ind;</span>
+<span class="nc bnc" id="L691" title="All 2 branches missed.">        if (genome.length != i.genome.length)</span>
+<span class="nc" id="L692">            return false;</span>
+<span class="nc bnc" id="L693" title="All 2 branches missed.">        for (int j = 0; j &lt; genome.length; j++)</span>
+<span class="nc bnc" id="L694" title="All 2 branches missed.">            if (genome[j] != i.genome[j])</span>
+<span class="nc" id="L695">                return false;</span>
+<span class="nc" id="L696">        return true;</span>
+        }
+
+    public Object getGenome()
+        {
+<span class="nc" id="L701">        return genome;</span>
+        }
+
+    public void setGenome(Object gen)
+        {
+<span class="nc" id="L706">        genome = (float[]) gen;</span>
+<span class="nc" id="L707">        }</span>
+
+    public int genomeLength()
+        {
+<span class="nc" id="L711">        return genome.length;</span>
+        }
+
+    public void writeGenotype(final EvolutionState state,
+        final DataOutput dataOutput) throws IOException
+        {
+<span class="nc" id="L717">        dataOutput.writeInt(genome.length);</span>
+<span class="nc bnc" id="L718" title="All 2 branches missed.">        for (int x = 0; x &lt; genome.length; x++)</span>
+<span class="nc" id="L719">            dataOutput.writeFloat(genome[x]);</span>
+<span class="nc" id="L720">        }</span>
+
+    public void readGenotype(final EvolutionState state,
+        final DataInput dataInput) throws IOException
+        {
+<span class="nc" id="L725">        int len = dataInput.readInt();</span>
+<span class="nc bnc" id="L726" title="All 4 branches missed.">        if (genome == null || genome.length != len)</span>
+<span class="nc" id="L727">            genome = new float[len];</span>
+<span class="nc bnc" id="L728" title="All 2 branches missed.">        for (int x = 0; x &lt; genome.length; x++)</span>
+<span class="nc" id="L729">            genome[x] = dataInput.readFloat();</span>
+<span class="nc" id="L730">        }</span>
+
+    /** Clips each gene value to be within its specified [min,max] range.  
+        NaN is presently considered in range but the behavior of this method
+        should be assumed to be unspecified on encountering NaN. */
+    public void clamp() 
+        {
+<span class="nc" id="L737">        FloatVectorSpecies _species = (FloatVectorSpecies)species;</span>
+<span class="nc bnc" id="L738" title="All 2 branches missed.">        for (int i = 0; i &lt; genomeLength(); i++)</span>
+            {
+<span class="nc" id="L740">            float minGene = (float)_species.minGene(i);</span>
+<span class="nc bnc" id="L741" title="All 2 branches missed.">            if (genome[i] &lt; minGene)</span>
+<span class="nc" id="L742">                genome[i] = minGene;</span>
+            else 
+                {
+<span class="nc" id="L745">                float maxGene = (float)_species.maxGene(i);</span>
+<span class="nc bnc" id="L746" title="All 2 branches missed.">                if (genome[i] &gt; maxGene)</span>
+<span class="nc" id="L747">                    genome[i] = maxGene;</span>
+                }
+            }
+<span class="nc" id="L750">        }</span>
+                
+    public void setGenomeLength(int len)
+        {
+<span class="nc" id="L754">        float[] newGenome = new float[len];</span>
+<span class="nc" id="L755">        System.arraycopy(genome, 0, newGenome, 0, </span>
+<span class="nc bnc" id="L756" title="All 2 branches missed.">            genome.length &lt; newGenome.length ? genome.length : newGenome.length);</span>
+<span class="nc" id="L757">        genome = newGenome;</span>
+<span class="nc" id="L758">        }</span>
+
+    /** Returns true if each gene value is within is specified [min,max] range.
+        NaN is presently considered in range but the behavior of this method
+        should be assumed to be unspecified on encountering NaN. */
+    public boolean isInRange() 
+        {
+<span class="nc" id="L765">        FloatVectorSpecies _species = (FloatVectorSpecies)species;</span>
+<span class="nc bnc" id="L766" title="All 2 branches missed.">        for (int i = 0; i &lt; genomeLength(); i++)</span>
+<span class="nc bnc" id="L767" title="All 2 branches missed.">            if (genome[i] &lt; _species.minGene(i) ||</span>
+<span class="nc bnc" id="L768" title="All 2 branches missed.">                genome[i] &gt; _species.maxGene(i)) return false;</span>
+<span class="nc" id="L769">        return true;</span>
+        }
+
+    public double distanceTo(Individual otherInd)
+        { 
+<span class="nc bnc" id="L774" title="All 2 branches missed.">        if (!(otherInd instanceof FloatVectorIndividual)) </span>
+<span class="nc" id="L775">            return super.distanceTo(otherInd);  // will return infinity!</span>
+                
+<span class="nc" id="L777">        FloatVectorIndividual other = (FloatVectorIndividual) otherInd;</span>
+<span class="nc" id="L778">        float[] otherGenome = other.genome;</span>
+<span class="nc" id="L779">        double sumSquaredDistance =0.0;</span>
+<span class="nc bnc" id="L780" title="All 2 branches missed.">        for(int i=0; i &lt; other.genomeLength(); i++)</span>
+            {
+<span class="nc" id="L782">            double dist = this.genome[i] - otherGenome[i];</span>
+<span class="nc" id="L783">            sumSquaredDistance += dist*dist;</span>
+            }
+<span class="nc" id="L785">        return StrictMath.sqrt(sumSquaredDistance);</span>
+        }
+    }
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

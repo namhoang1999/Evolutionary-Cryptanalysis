@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimpleEvolutionState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.simple</a> &gt; <span class="el_source">SimpleEvolutionState.java</span></div><h1>SimpleEvolutionState.java</h1><pre class="source lang-java linenums">/*
+  Copyright 2006 by Sean Luke
+  Licensed under the Academic Free License version 3.0
+  See the file &quot;LICENSE&quot; for more information
+*/
+
+
+package ec.simple;
+import ec.*;
+import ec.util.Checkpoint;
+
+/* 
+ * SimpleEvolutionState.java
+ * 
+ * Created: Tue Aug 10 22:14:46 1999
+ * By: Sean Luke
+ */
+
+/**
+ * A SimpleEvolutionState is an EvolutionState which implements a simple form
+ * of generational evolution.
+ *
+ * &lt;p&gt;First, all the individuals in the population are created.
+ * &lt;b&gt;(A)&lt;/b&gt;Then all individuals in the population are evaluated.
+ * Then the population is replaced in its entirety with a new population
+ * of individuals bred from the old population.  Goto &lt;b&gt;(A)&lt;/b&gt;.
+ *
+ * &lt;p&gt;Evolution stops when an ideal individual is found (if quitOnRunComplete
+ * is set to true), or when the number of generations (loops of &lt;b&gt;(A)&lt;/b&gt;)
+ * exceeds the parameter value numGenerations.  Each generation the system
+ * will perform garbage collection and checkpointing, if the appropriate
+ * parameters were set.
+ *
+ * &lt;p&gt;This approach can be readily used for
+ * most applications of Genetic Algorithms and Genetic Programming.
+ *
+ * @author Sean Luke
+ * @version 1.0 
+ */
+
+<span class="fc" id="L41">public class SimpleEvolutionState extends EvolutionState</span>
+    {
+    private static final long serialVersionUID = 1;
+
+    public void startFresh() 
+        {
+<span class="fc" id="L47">        output.message(&quot;Setting up&quot;);</span>
+<span class="fc" id="L48">        setup(this,null);  // a garbage Parameter</span>
+
+        // POPULATION INITIALIZATION
+<span class="fc" id="L51">        output.message(&quot;Initializing Generation 0&quot;);</span>
+<span class="fc" id="L52">        statistics.preInitializationStatistics(this);</span>
+<span class="fc" id="L53">        population = initializer.initialPopulation(this, 0); // unthreaded</span>
+<span class="fc" id="L54">        statistics.postInitializationStatistics(this);</span>
+
+        // INITIALIZE CONTACTS -- done after initialization to allow
+        // a hook for the user to do things in Initializer before
+        // an attempt is made to connect to island models etc.
+<span class="fc" id="L59">        exchanger.initializeContacts(this);</span>
+<span class="fc" id="L60">        evaluator.initializeContacts(this);</span>
+<span class="fc" id="L61">        }</span>
+
+    public int evolve()
+        {
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (generation &gt; 0) </span>
+<span class="nc" id="L66">            output.message(&quot;Generation &quot; + generation +&quot;\tEvaluations So Far &quot; + evaluations);</span>
+
+        // EVALUATION
+<span class="fc" id="L69">        statistics.preEvaluationStatistics(this);</span>
+<span class="fc" id="L70">        evaluator.evaluatePopulation(this);</span>
+
+        // LOCAL STATE UPDATES (used by some algorithms like ACO or EDAs to update auxiliary state
+        // SimpleEvolutionState executes all the &quot;local&quot; updates in a batch—-so it's really a kind of &quot;global&quot; update
+        // See SteadyStateEvolutionState for true local state updates
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        for (int i = 0; i &lt; this.population.subpops.size(); i++)</span>
+            {
+<span class="fc" id="L77">            final Subpopulation subpop = this.population.subpops.get(i);</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            for (final Individual ind : subpop.individuals)</span>
+<span class="fc" id="L79">                evaluator.postEvaluationLocalUpdate(this, ind, i);</span>
+            }
+
+<span class="fc" id="L82">        statistics.postEvaluationStatistics(this);</span>
+
+        // SHOULD WE QUIT?
+<span class="fc" id="L85">        String runCompleteMessage = evaluator.runComplete(this);</span>
+<span class="pc bpc" id="L86" title="3 of 4 branches missed.">        if ((runCompleteMessage != null) &amp;&amp; quitOnRunComplete)</span>
+            {
+<span class="nc" id="L88">            output.message(runCompleteMessage);</span>
+<span class="nc" id="L89">            return R_SUCCESS;</span>
+            }
+
+        // SHOULD WE QUIT?
+<span class="pc bpc" id="L93" title="5 of 8 branches missed.">        if ((numGenerations != UNDEFINED &amp;&amp; generation &gt;= numGenerations-1) ||</span>
+            (numEvaluations != UNDEFINED &amp;&amp; evaluations &gt;= numEvaluations))
+            {
+<span class="nc" id="L96">            return R_FAILURE;</span>
+            }
+ 
+        // INCREMENT GENERATION AND CHECKPOINT
+<span class="fc" id="L100">        generation++;</span>
+                     
+        // PRE-BREEDING EXCHANGING
+<span class="fc" id="L103">        statistics.prePreBreedingExchangeStatistics(this);</span>
+<span class="fc" id="L104">        population = exchanger.preBreedingExchangePopulation(this);</span>
+<span class="fc" id="L105">        statistics.postPreBreedingExchangeStatistics(this);</span>
+
+<span class="fc" id="L107">        String exchangerWantsToShutdown = exchanger.runComplete(this);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (exchangerWantsToShutdown!=null)</span>
+            { 
+<span class="nc" id="L110">            output.message(exchangerWantsToShutdown);</span>
+<span class="nc" id="L111">            return R_SUCCESS;</span>
+            }
+
+        /// GLOBAL STATE UPDATE (used by some algorithms like ACO to EDAS to update auxiliary state)
+<span class="fc" id="L115">        evaluator.postEvaluationGlobalUpdate(this);</span>
+        
+        // BREEDING
+<span class="fc" id="L118">        statistics.preBreedingStatistics(this);</span>
+<span class="fc" id="L119">        population = breeder.breedPopulation(this);</span>
+<span class="fc" id="L120">        statistics.postBreedingStatistics(this);</span>
+            
+       
+        // POST-BREEDING EXCHANGING
+<span class="fc" id="L124">        statistics.prePostBreedingExchangeStatistics(this);</span>
+<span class="fc" id="L125">        population = exchanger.postBreedingExchangePopulation(this);</span>
+<span class="fc" id="L126">        statistics.postPostBreedingExchangeStatistics(this);</span>
+
+<span class="pc bpc" id="L128" title="3 of 4 branches missed.">        if (checkpoint &amp;&amp; (generation - 1) % checkpointModulo == 0) </span>
+            {
+<span class="nc" id="L130">            output.message(&quot;Checkpointing&quot;);</span>
+<span class="nc" id="L131">            statistics.preCheckpointStatistics(this);</span>
+<span class="nc" id="L132">            Checkpoint.setCheckpoint(this);</span>
+<span class="nc" id="L133">            statistics.postCheckpointStatistics(this);</span>
+            }
+
+<span class="fc" id="L136">        return R_NOTDONE;</span>
+        }
+
+    /**
+     * @param result
+     */
+    public void finish(int result) 
+        {
+<span class="nc" id="L144">        output.message(&quot;Total Evaluations &quot; + evaluations);</span>
+        /* finish up -- we completed. */
+<span class="nc" id="L146">        statistics.finalStatistics(this,result);</span>
+<span class="nc" id="L147">        finisher.finishPopulation(this,result);</span>
+<span class="nc" id="L148">        exchanger.closeContacts(this,result);</span>
+<span class="nc" id="L149">        evaluator.closeContacts(this,result);</span>
+<span class="nc" id="L150">        }</span>
+
+    }
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

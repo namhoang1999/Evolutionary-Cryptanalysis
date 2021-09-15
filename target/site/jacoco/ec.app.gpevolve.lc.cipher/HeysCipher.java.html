@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HeysCipher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.gpevolve.lc.cipher</a> &gt; <span class="el_source">HeysCipher.java</span></div><h1>HeysCipher.java</h1><pre class="source lang-java linenums">package ec.app.gpevolve.lc.cipher;
+
+import ec.app.gpevolve.lc.Helper;
+
+public class HeysCipher {
+<span class="nc" id="L6">	boolean verbose = false;</span>
+	// 4x4 S-Box for encryption and Inverse S-Box for decryption
+	// 1 compact 2D array can be used instead but it would be inefficient	
+<span class="nc" id="L9">	public static int[] sBox = {14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7};</span>
+<span class="nc" id="L10">	static int[] sBoxInverse = {14,3,4,8,1,12,10,15,7,13,9,6,11,2,0,5}; </span>
+	
+	// 4x4 P-Box
+<span class="nc" id="L13">	static int[] pBox = {0,4,8,12,1,5,9,13,2,6,10,14,3,7,11,15};</span>
+	
+<span class="nc" id="L15">	public static double[][] LAT = Helper.generateLinearTable();</span>
+<span class="nc" id="L16">	public static double[][] DDT = Helper.generateDifferentialTable();</span>
+
+	public int[] key;
+	public int maxRound;
+	
+	/**
+	 * Instantiate a Hey's Cipher object
+	 * @param k: cipher keys (16-bit key)
+	 */
+<span class="nc" id="L25">	public HeysCipher(int[] k) {</span>
+<span class="nc" id="L26">		key = k;</span>
+<span class="nc" id="L27">		maxRound = k.length;</span>
+<span class="nc" id="L28">	}</span>
+
+	/**
+	 * Encrytion/Decryption using S-Box
+	 * @param inputBlock: 16 bit input blocks 
+	 * @param encrypt: True - Encryption, False, Decryption
+	 * @return 16-bit substituted output 
+	 */
+	int sBoxEncrypt(int input, boolean encrypt) {
+		int block1,block2,block3,block4;
+		
+		// Use a bit mask and shift operator 
+		// to split input data into 4 sub-blocks
+		//
+		//       input       bit
+		//      to S-Box     mask 
+		//          v         v
+<span class="nc" id="L45">		block1 =  input &amp; 0x000f;			// 0000.0000.0000.XXXX</span>
+<span class="nc" id="L46">		block2 = (input &amp; 0x00f0) &gt;&gt; 4;		// 0000.0000.XXXX.0000</span>
+<span class="nc" id="L47">		block3 = (input &amp; 0x0f00) &gt;&gt; 8;		// 0000.XXXX.0000.0000</span>
+<span class="nc" id="L48">		block4 = (input &amp; 0xf000) &gt;&gt; 12;	// XXXX.0000.0000.0000</span>
+		
+		// Substitute blocks using S-Box
+<span class="nc bnc" id="L51" title="All 2 branches missed.">		if (encrypt) {</span>
+			// In case of encryption, use encryption table
+<span class="nc" id="L53">			block1 = sBox[block1];</span>
+<span class="nc" id="L54">			block2 = sBox[block2];</span>
+<span class="nc" id="L55">			block3 = sBox[block3];</span>
+<span class="nc" id="L56">			block4 = sBox[block4];</span>
+		} else {
+			// In case of decryption, use decryption (inverse) table
+<span class="nc" id="L59">			block1 = sBoxInverse[block1];</span>
+<span class="nc" id="L60">			block2 = sBoxInverse[block2];</span>
+<span class="nc" id="L61">			block3 = sBoxInverse[block3];</span>
+<span class="nc" id="L62">			block4 = sBoxInverse[block4];</span>
+		}
+		
+		// Return the concatenated 16-bit block
+<span class="nc" id="L66">		return block1 | block2&lt;&lt;4 | block3&lt;&lt;8 | block4&lt;&lt;12;</span>
+	}
+
+	/**
+	 * Encryption/Decryption using P-Box
+	 * @param inputBlock: 16-bit input block (4 4-bit blocks)
+	 * @return substituted 16-bit output 
+	 */
+	public static int pBoxEncrypt(int input) {
+<span class="nc" id="L75">		int output = 0;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		for (int i = 0; i &lt; 16; i++) {</span>
+			// set the output bit to 1 if the 
+			// correspoding input bit (from the P-box) is 1
+<span class="nc bnc" id="L79" title="All 2 branches missed.">			if (Helper.getBit(input, i) == 1) </span>
+<span class="nc" id="L80">				output = Helper.setBit(output, pBox[i], 1);</span>
+		}
+		
+<span class="nc" id="L83">		return output;</span>
+	}
+
+	/**
+	 * Encryption function
+	 * @param inputBlock: 16-bit plaintext input block
+	 * @return 16-bit ciphertext output
+	 */
+	int encrypt(int inputBlock) {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">		if (verbose) System.out.println(&quot;               &quot; + Helper.intf(inputBlock,16));</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		for (int round = 0; round &lt; maxRound-1; round++) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">			if (verbose) System.out.println(&quot;Round &quot; + round + &quot; | key: &quot; + Helper.intf(key[round],16));</span>
+			
+			// Mixing the input block with the round key
+<span class="nc" id="L97">			inputBlock = inputBlock ^ key[round];</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">			if (verbose) System.out.println(&quot;Key mixing:    &quot; + Helper.intf(inputBlock,16));</span>
+			
+			// S-Box Substitution
+<span class="nc" id="L101">			inputBlock = sBoxEncrypt(inputBlock,true);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">			if (verbose) System.out.println(&quot;S-box:         &quot; + Helper.intf(inputBlock,16));</span>
+			
+			// P-Box Permutation
+<span class="nc bnc" id="L105" title="All 2 branches missed.">			if (round != maxRound-2) {</span>
+<span class="nc" id="L106">				inputBlock = pBoxEncrypt(inputBlock);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">				if (verbose) System.out.println(&quot;P-box:         &quot; + Helper.intf(inputBlock,16) + &quot;\n&quot;);</span>
+			}
+		}
+		// Apply subkey after the last round
+		// to prevent attacker working backward
+		// through the last round's substitution
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if (verbose) System.out.println(&quot;Final key      &quot; + Helper.intf(key[key.length-1],16));</span>
+<span class="nc" id="L114">		inputBlock = inputBlock ^ key[key.length-1];</span>
+
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		if (verbose) System.out.println(&quot;               &quot; + Helper.intf(inputBlock,16));</span>
+		
+<span class="nc" id="L118">		return inputBlock;</span>
+	}
+
+	/**
+	 * Decryption function
+	 * @param inputBlock: 16-bit ciphertext input block
+	 * @return 16-bit plaintext output
+	 */
+	int decrypt(int inputBlock) {
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		if (verbose) System.out.println(&quot;               &quot; + Helper.intf(inputBlock,16));</span>
+	
+<span class="nc" id="L129">		inputBlock = inputBlock ^ key[key.length-1];</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if (verbose) System.out.println(&quot;Final key      &quot; + Helper.intf(key[key.length-1],16));</span>
+		
+<span class="nc bnc" id="L132" title="All 2 branches missed.">		for (int round = maxRound-1; round &gt;= 0; round--) {</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">			if (verbose) System.out.println(&quot;Round &quot; + round + &quot; | key: &quot; + Helper.intf(key[round],16));</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">			if (round != maxRound-1) {</span>
+<span class="nc" id="L135">				inputBlock = pBoxEncrypt(inputBlock);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">				if (verbose) System.out.println(&quot;P-box:         &quot; + Helper.intf(inputBlock,16));</span>
+			}
+			
+<span class="nc" id="L139">			inputBlock = sBoxEncrypt(inputBlock,false);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">			if (verbose) System.out.println(&quot;S-box:         &quot; + Helper.intf(inputBlock,16));</span>
+			
+<span class="nc" id="L142">			inputBlock = inputBlock ^ key[round];</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">			if (verbose) System.out.println(&quot;Key mixing:    &quot; + Helper.intf(inputBlock,16) + &quot;\n&quot;);</span>
+		}
+		
+<span class="nc" id="L146">		return inputBlock;</span>
+	}
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

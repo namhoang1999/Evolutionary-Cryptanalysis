@@ -1,0 +1,42 @@
+
+Generation: 0
+Best Individual:
+Subpopulation 0:
+Evaluated: T
+Fitness: 0.01483154296875
+0 1 1 0 0 0 1 0 0 0 1 1 1 1 1 0 
+
+Generation: 1
+Best Individual:
+Subpopulation 0:
+Evaluated: T
+Fitness: 0.01483154296875
+0 1 1 0 0 0 1 0 0 0 1 1 1 1 1 0 
+
+Generation: 2
+Best Individual:
+Subpopulation 0:
+Evaluated: T
+Fitness: 0.01483154296875
+0 0 1 0 1 0 0 0 0 0 1 0 1 1 1 1 
+
+Generation: 3
+Best Individual:
+Subpopulation 0:
+Evaluated: T
+Fitness: 0.01483154296875
+0 0 1 0 1 0 0 0 0 0 1 0 1 1 1 1 
+
+Generation: 4
+Best Individual:
+Subpopulation 0:
+Evaluated: T
+Fitness: 0.019775390625
+0 0 1 0 0 0 0 1 0 0 1 0 0 1 1 1 
+
+Best Individual of Run:
+Subpopulation 0:
+Evaluated: T
+Fitness: 0.019775390625
+0 0 1 0 0 0 0 1 0 0 1 0 0 1 1 1 
+Null count: 4370

@@ -1,0 +1,1179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Console.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.display</a> &gt; <span class="el_source">Console.java</span></div><h1>Console.java</h1><pre class="source lang-java linenums">/*
+  Copyright 2006 by Sean Paus
+  Licensed under the Academic Free License version 3.0
+  See the file &quot;LICENSE&quot; for more information
+*/
+
+
+/*
+ * Created on Feb 3, 2005
+ *
+ */
+package ec.display;
+
+import java.awt.*;
+import javax.swing.*;
+import ec.util.*;
+
+import java.awt.BorderLayout;
+import java.awt.FileDialog;
+import java.awt.GraphicsConfiguration;
+import java.awt.HeadlessException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OptionalDataException;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
+import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.filechooser.FileFilter;
+
+import ec.EvolutionState;
+import ec.Evolve;
+import ec.util.BadParameterException;
+import ec.util.Checkpoint;
+import ec.util.MersenneTwisterFast;
+import ec.util.Output;
+import ec.util.ParamClassLoadException;
+import ec.util.Parameter;
+import ec.util.ParameterDatabase;
+import ec.util.Version;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.BoxLayout;
+/**
+ * @author spaus
+ *
+ */
+public class Console extends JFrame 
+    {
+    private static final long serialVersionUID = 1;
+    
+    static final int DEFAULT_HEIGHT = 500;
+    static final int DEFAULT_WIDTH = 975;
+<span class="nc" id="L65">    ParameterDatabase parameters = null;</span>
+<span class="nc" id="L66">    EvolutionState state = null;</span>
+<span class="nc" id="L67">    Thread playThread = null;</span>
+<span class="nc" id="L68">    boolean playing = false;</span>
+<span class="nc" id="L69">    boolean paused = false;</span>
+<span class="nc" id="L70">    Object buttonLock = new Object();</span>
+<span class="nc" id="L71">    Object cleanupLock = new Object();</span>
+    int currentJob;
+    final String[] clArgs;
+    
+<span class="nc" id="L75">    javax.swing.JPanel jContentPane = null;</span>
+<span class="nc" id="L76">    javax.swing.JMenuBar jJMenuBar = null;</span>
+<span class="nc" id="L77">    javax.swing.JMenu fileMenu = null;</span>
+<span class="nc" id="L78">    javax.swing.JMenu helpMenu = null;</span>
+<span class="nc" id="L79">    javax.swing.JMenuItem exitMenuItem = null;</span>
+<span class="nc" id="L80">    javax.swing.JMenuItem aboutMenuItem = null;</span>
+<span class="nc" id="L81">    JTabbedPane jTabbedPane = null;</span>
+<span class="nc" id="L82">    JToolBar jToolBar = null;</span>
+<span class="nc" id="L83">    JButton playButton = null;</span>
+<span class="nc" id="L84">    JButton pauseButton = null;</span>
+<span class="nc" id="L85">    JButton stopButton = null;</span>
+    
+<span class="nc" id="L87">    JButton stepButton = null;</span>
+<span class="nc" id="L88">    JMenuItem loadParametersMenuItem = null;</span>
+<span class="nc" id="L89">    ParametersPanel paramPanel = null;</span>
+<span class="nc" id="L90">    ControlPanel conPanel = null;</span>
+    /**
+     * @throws java.awt.HeadlessException
+     */
+    public Console(String[] clArgs) throws HeadlessException 
+        {
+<span class="nc" id="L96">        super();</span>
+<span class="nc" id="L97">        this.clArgs = clArgs;</span>
+<span class="nc" id="L98">        initialize();</span>
+<span class="nc" id="L99">        }</span>
+    
+    /**
+     * @param gc
+     */
+    public Console(GraphicsConfiguration gc, String[] clArgs) 
+        {
+<span class="nc" id="L106">        super(gc);</span>
+<span class="nc" id="L107">        this.clArgs = clArgs;</span>
+<span class="nc" id="L108">        initialize();</span>
+<span class="nc" id="L109">        }</span>
+    
+    /**
+     * @param title
+     * @throws java.awt.HeadlessException
+     */
+    public Console(String title, String[] clArgs) throws HeadlessException 
+        {
+<span class="nc" id="L117">        super(title);</span>
+<span class="nc" id="L118">        this.clArgs = clArgs;</span>
+<span class="nc" id="L119">        initialize();</span>
+<span class="nc" id="L120">        }</span>
+    
+    /**
+     * @param title
+     * @param gc
+     */
+    public Console(String title, GraphicsConfiguration gc, String[] clArgs) 
+        {
+<span class="nc" id="L128">        super(title, gc);</span>
+<span class="nc" id="L129">        this.clArgs = clArgs;</span>
+<span class="nc" id="L130">        initialize();</span>
+<span class="nc" id="L131">        }</span>
+    
+    /**
+     * This method initializes jTabbedPane      
+     *  
+     * @return javax.swing.JTabbedPane  
+     */    
+    JTabbedPane getJTabbedPane() 
+        {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (jTabbedPane == null) </span>
+            {
+<span class="nc" id="L142">            jTabbedPane = new JTabbedPane();</span>
+<span class="nc" id="L143">            conPanel = new ControlPanel(this);</span>
+<span class="nc" id="L144">            conPanel.disableControls();</span>
+<span class="nc" id="L145">            jTabbedPane.add(&quot;Control&quot;,conPanel);</span>
+<span class="nc" id="L146">            paramPanel = new ParametersPanel(this);</span>
+<span class="nc" id="L147">            jTabbedPane.add(&quot;Parameters&quot;,paramPanel);</span>
+<span class="nc" id="L148">            jTabbedPane.addTab(&quot;Statistics&quot;, null, getStatisticsPane(), null);</span>
+<span class="nc" id="L149">            jTabbedPane.addTab(&quot;Inspection&quot;, null, getInspectionPane(), null);</span>
+            }
+<span class="nc" id="L151">        return jTabbedPane;</span>
+        }
+    
+    /**
+     * This method initializes jToolBar 
+     *  
+     * @return javax.swing.JToolBar     
+     */    
+    JToolBar getJToolBar() 
+        {
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if (jToolBar == null) </span>
+            {
+<span class="nc" id="L163">            jToolBar = new JToolBar();</span>
+<span class="nc" id="L164">            jToolBar.add(getPlayButton());</span>
+<span class="nc" id="L165">            jToolBar.add(getStepButton());</span>
+<span class="nc" id="L166">            jToolBar.add(getPauseButton());</span>
+<span class="nc" id="L167">            jToolBar.add(getStopButton());</span>
+            }
+<span class="nc" id="L169">        return jToolBar;</span>
+        }
+    
+    /**
+     * This method initializes jButton  
+     *  
+     * @return javax.swing.JButton      
+     */    
+    JButton getPlayButton() 
+        {
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if (playButton == null) </span>
+            {
+<span class="nc" id="L181">            playButton = new JButton();</span>
+<span class="nc" id="L182">            playButton.setIcon(new ImageIcon(getClass().getResource(&quot;Play.png&quot;)));</span>
+<span class="nc" id="L183">            playButton.setEnabled(false);</span>
+<span class="nc" id="L184">            playButton.setToolTipText(&quot;Play&quot;);</span>
+<span class="nc" id="L185">            playButton.addActionListener(new java.awt.event.ActionListener() </span>
+<span class="nc" id="L186">                { </span>
+                public void actionPerformed(java.awt.event.ActionEvent e) 
+                    {
+<span class="nc" id="L189">                    synchronized(buttonLock) </span>
+                        {
+<span class="nc bnc" id="L191" title="All 6 branches missed.">                        if (!playing || (playing &amp;&amp; paused)) </span>
+                            {
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                            if (!paused) </span>
+                                {
+<span class="nc" id="L195">                                currentJob = 0;</span>
+<span class="nc" id="L196">                                spawnPlayThread(false);</span>
+                                } else 
+                                {
+<span class="nc" id="L199">                                resumePlayThread();</span>
+                                }
+<span class="nc" id="L201">                            playButton.setEnabled(false);</span>
+<span class="nc" id="L202">                            stepButton.setEnabled(false);</span>
+<span class="nc" id="L203">                            pauseButton.setEnabled(true);</span>
+<span class="nc" id="L204">                            stopButton.setEnabled(true);</span>
+<span class="nc" id="L205">                            conPanel.disableControls();</span>
+<span class="nc" id="L206">                            paused = false;</span>
+<span class="nc" id="L207">                            playing = true;</span>
+                            }
+<span class="nc" id="L209">                        }</span>
+<span class="nc" id="L210">                    }</span>
+                });
+            }
+<span class="nc" id="L213">        return playButton;</span>
+        }
+    /**
+     * This method initializes jButton1 
+     *  
+     * @return javax.swing.JButton      
+     */    
+    JButton getPauseButton() 
+        {
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (pauseButton == null) </span>
+            {
+<span class="nc" id="L224">            pauseButton = new JButton();</span>
+<span class="nc" id="L225">            pauseButton.setIcon(new ImageIcon(getClass().getResource(&quot;Pause.png&quot;)));</span>
+<span class="nc" id="L226">            pauseButton.setEnabled(false);</span>
+<span class="nc" id="L227">            pauseButton.setToolTipText(&quot;Pause&quot;);</span>
+<span class="nc" id="L228">            pauseButton.addActionListener(new java.awt.event.ActionListener() </span>
+<span class="nc" id="L229">                { </span>
+                public void actionPerformed(java.awt.event.ActionEvent e) 
+                    {
+<span class="nc" id="L232">                    synchronized(buttonLock) </span>
+                        {
+<span class="nc bnc" id="L234" title="All 4 branches missed.">                        if (playing &amp;&amp; !paused) </span>
+                            {
+<span class="nc" id="L236">                            paused = true;</span>
+<span class="nc" id="L237">                            pausePlayThread();</span>
+<span class="nc" id="L238">                            stepButton.setEnabled(true);</span>
+<span class="nc" id="L239">                            playButton.setEnabled(true);</span>
+<span class="nc" id="L240">                            pauseButton.setEnabled(false);</span>
+                            }
+<span class="nc" id="L242">                        }</span>
+<span class="nc" id="L243">                    }</span>
+                });
+            }
+<span class="nc" id="L246">        return pauseButton;</span>
+        }
+    /**
+     * This method initializes jButton2 
+     *  
+     * @return javax.swing.JButton      
+     */    
+    JButton getStopButton() 
+        {
+<span class="nc bnc" id="L255" title="All 2 branches missed.">        if (stopButton == null) </span>
+            {
+<span class="nc" id="L257">            stopButton = new JButton();</span>
+<span class="nc" id="L258">            stopButton.setIcon(</span>
+                new ImageIcon(
+<span class="nc" id="L260">                    getClass().getResource(&quot;Stop.png&quot;)));</span>
+<span class="nc" id="L261">            stopButton.setEnabled(false);</span>
+<span class="nc" id="L262">            stopButton.setToolTipText(&quot;Stop&quot;);</span>
+<span class="nc" id="L263">            stopButton.addActionListener(new java.awt.event.ActionListener() </span>
+<span class="nc" id="L264">                { </span>
+                public void actionPerformed(java.awt.event.ActionEvent e) 
+                    {
+<span class="nc" id="L267">                    synchronized(buttonLock) </span>
+                        {
+<span class="nc bnc" id="L269" title="All 2 branches missed.">                        if (playing) </span>
+                            {
+<span class="nc" id="L271">                            killPlayThread();</span>
+<span class="nc" id="L272">                            stopButton.setEnabled(false);</span>
+<span class="nc" id="L273">                            pauseButton.setEnabled(false);</span>
+<span class="nc" id="L274">                            stepButton.setEnabled(true);</span>
+<span class="nc" id="L275">                            playButton.setEnabled(true);</span>
+<span class="nc" id="L276">                            conPanel.enableControls();</span>
+<span class="nc" id="L277">                            paused = false;</span>
+<span class="nc" id="L278">                            playing = false;</span>
+                            }
+<span class="nc" id="L280">                        }</span>
+<span class="nc" id="L281">                    }</span>
+                });
+            }
+<span class="nc" id="L284">        return stopButton;</span>
+        }
+    /**
+     * This method initializes jButton  
+     *  
+     * @return javax.swing.JButton      
+     */    
+    JButton getStepButton() 
+        {
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (stepButton == null) </span>
+            {
+<span class="nc" id="L295">            stepButton = new JButton();</span>
+<span class="nc" id="L296">            stepButton.setEnabled(false);</span>
+<span class="nc" id="L297">            stepButton.setIcon(new ImageIcon(getClass().getResource(&quot;Step.png&quot;)));</span>
+<span class="nc" id="L298">            stepButton.setPressedIcon(new ImageIcon(getClass().getResource(&quot;Stepping.png&quot;)));</span>
+<span class="nc" id="L299">            stepButton.setToolTipText(&quot;Step&quot;);</span>
+<span class="nc" id="L300">            stepButton.addActionListener(new java.awt.event.ActionListener() </span>
+<span class="nc" id="L301">                { </span>
+                public void actionPerformed(java.awt.event.ActionEvent e) 
+                    {
+<span class="nc" id="L304">                    synchronized(buttonLock) </span>
+                        {
+<span class="nc" id="L306">                        paused = true;</span>
+<span class="nc" id="L307">                        setStep(true);</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">                        if (!playing) </span>
+                            {
+<span class="nc" id="L310">                            spawnPlayThread(false);</span>
+<span class="nc" id="L311">                            stopButton.setEnabled(true);</span>
+<span class="nc" id="L312">                            conPanel.disableControls();</span>
+<span class="nc" id="L313">                            playing = true;</span>
+                            }
+                        
+<span class="nc" id="L316">                        synchronized(playThread) </span>
+                            {
+<span class="nc" id="L318">                            playThread.notify();</span>
+<span class="nc" id="L319">                            }</span>
+<span class="nc" id="L320">                        }</span>
+<span class="nc" id="L321">                    }</span>
+                });
+            }
+<span class="nc" id="L324">        return stepButton;</span>
+        }
+    /**
+     * This method initializes jMenuItem        
+     *  
+     * @return javax.swing.JMenuItem    
+     */    
+    JMenuItem getLoadParametersMenuItem() 
+        {
+<span class="nc bnc" id="L333" title="All 2 branches missed.">        if (loadParametersMenuItem == null) </span>
+            {
+<span class="nc" id="L335">            final String PARAMFILE_EXT = &quot;params&quot;;</span>
+<span class="nc" id="L336">            this.getAboutMenuItem();</span>
+<span class="nc" id="L337">            loadParametersMenuItem = new JMenuItem();</span>
+<span class="nc" id="L338">            loadParametersMenuItem.setText(&quot;Load Parameters...&quot;);</span>
+<span class="nc" id="L339">            loadParametersMenuItem.addActionListener(new java.awt.event.ActionListener() </span>
+<span class="nc" id="L340">                {</span>
+                public void actionPerformed(java.awt.event.ActionEvent e) 
+                    {    
+<span class="nc" id="L343">                    FileDialog fileDialog = new FileDialog(Console.this,&quot;Open...&quot;,FileDialog.LOAD);</span>
+<span class="nc" id="L344">                    fileDialog.setDirectory(System.getProperty(&quot;user.dir&quot;));</span>
+<span class="nc" id="L345">                    fileDialog.setFile(&quot;*.&quot;+PARAMFILE_EXT);</span>
+<span class="nc" id="L346">                    fileDialog.setVisible(true);</span>
+<span class="nc" id="L347">                    String fileName = fileDialog.getFile();</span>
+<span class="nc bnc" id="L348" title="All 4 branches missed.">                    while (fileName != null &amp;&amp; !fileName.endsWith(&quot;.&quot;+PARAMFILE_EXT)) </span>
+                        {
+<span class="nc" id="L350">                        JOptionPane optPane = new JOptionPane(fileDialog.getFile()+&quot; is not a legal parameters file&quot;,JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L351">                        JDialog optDialog = optPane.createDialog(Console.this,&quot;Error!&quot;);</span>
+<span class="nc" id="L352">                        optDialog.setVisible(true);</span>
+<span class="nc" id="L353">                        fileDialog.setFile(&quot;*.&quot;+PARAMFILE_EXT);</span>
+<span class="nc" id="L354">                        fileDialog.setVisible(true);</span>
+<span class="nc" id="L355">                        fileName = fileDialog.getFile();</span>
+<span class="nc" id="L356">                        }</span>
+                    
+<span class="nc bnc" id="L358" title="All 2 branches missed.">                    if (fileName != null) </span>
+                        {    
+<span class="nc" id="L360">                        File f = new File(fileDialog.getDirectory(), fileName);</span>
+<span class="nc" id="L361">                        Console.this.loadParameters(f);</span>
+<span class="nc" id="L362">                        playButton.setEnabled(true);</span>
+<span class="nc" id="L363">                        stepButton.setEnabled(true);</span>
+<span class="nc" id="L364">                        conPanel.enableControls();</span>
+                        }
+<span class="nc" id="L366">                    }</span>
+                });
+            }
+<span class="nc" id="L369">        return loadParametersMenuItem;</span>
+        }
+    
+    /**
+     * This method initializes jMenuItem        
+     *  
+     * @return javax.swing.JMenuItem    
+     */    
+    JMenuItem getLoadCheckpointMenuItem() 
+        {
+<span class="nc bnc" id="L379" title="All 2 branches missed.">        if (loadCheckpointMenuItem == null) </span>
+            {
+<span class="nc" id="L381">            loadCheckpointMenuItem = new JMenuItem();</span>
+<span class="nc" id="L382">            loadCheckpointMenuItem.setText(&quot;Load Checkpoint...&quot;);</span>
+<span class="nc" id="L383">            loadCheckpointMenuItem.addActionListener(new java.awt.event.ActionListener() </span>
+<span class="nc" id="L384">                { </span>
+                public void actionPerformed(java.awt.event.ActionEvent e) 
+                    {    
+<span class="nc" id="L387">                    JFileChooser chooser = new JFileChooser(</span>
+<span class="nc" id="L388">                        System.getProperty(&quot;user.dir&quot;));</span>
+<span class="nc" id="L389">                    chooser.setFileFilter(new FileFilter() </span>
+<span class="nc" id="L390">                        {</span>
+                        public boolean accept( File f )
+                            
+                            {
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                            if ( f.isDirectory() )</span>
+<span class="nc" id="L395">                                return true;</span>
+                            
+<span class="nc" id="L397">                            String extension = null;</span>
+<span class="nc" id="L398">                            String filename = f.getName();</span>
+<span class="nc" id="L399">                            int idx = filename.lastIndexOf( '.' );</span>
+<span class="nc bnc" id="L400" title="All 4 branches missed.">                            if ( idx &gt; 0 &amp;&amp; idx &lt; filename.length() - 1 )</span>
+                                
+                                {
+<span class="nc" id="L403">                                extension = filename.substring( idx + 1 ).toLowerCase();</span>
+                                }
+                            
+<span class="nc bnc" id="L406" title="All 2 branches missed.">                            if ( extension != null )</span>
+                                
+                                {
+<span class="nc bnc" id="L409" title="All 2 branches missed.">                                if ( extension.equals( &quot;gz&quot; ) )</span>
+<span class="nc" id="L410">                                    return true;</span>
+                                }
+                            
+<span class="nc" id="L413">                            return false;</span>
+                            }
+                        
+                        public String getDescription()
+                            
+                            {
+<span class="nc" id="L419">                            return &quot;Checkpoint Files&quot;;</span>
+                            }
+                        });
+<span class="nc" id="L422">                    int option = chooser.showOpenDialog( Console.this );</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">                    if ( option == JFileChooser.APPROVE_OPTION )</span>
+                        
+                        {
+<span class="nc" id="L426">                        File f = chooser.getSelectedFile();</span>
+<span class="nc" id="L427">                        Console.this.restoreFromCheckpoint(f);</span>
+<span class="nc" id="L428">                        playButton.setEnabled(true);</span>
+<span class="nc" id="L429">                        stepButton.setEnabled(true);</span>
+                        }
+<span class="nc" id="L431">                    }</span>
+                });
+            }
+<span class="nc" id="L434">        return loadCheckpointMenuItem;</span>
+        }
+    
+    /**
+     * This method initializes jTabbedPane1     
+     *  
+     * @return javax.swing.JTabbedPane  
+     */    
+    JTabbedPane getStatisticsPane() 
+        {
+<span class="nc bnc" id="L444" title="All 2 branches missed.">        if (statisticsPane == null) </span>
+            {
+<span class="nc" id="L446">            statisticsPane = new JTabbedPane();</span>
+            }
+<span class="nc" id="L448">        return statisticsPane;</span>
+        }
+    /**
+     * This method initializes jTabbedPane2     
+     *  
+     * @return javax.swing.JTabbedPane  
+     */    
+    JTabbedPane getInspectionPane() 
+        {
+<span class="nc bnc" id="L457" title="All 2 branches missed.">        if (inspectionPane == null) </span>
+            {
+<span class="nc" id="L459">            inspectionPane = new JTabbedPane();</span>
+            }
+<span class="nc" id="L461">        return inspectionPane;</span>
+        }
+    
+    /**
+     * This method initializes jPanel       
+     *      
+     * @return javax.swing.JPanel   
+     */    
+    JPanel getStatusPane() 
+        {
+<span class="nc bnc" id="L471" title="All 2 branches missed.">        if (statusPane == null) </span>
+            {
+<span class="nc" id="L473">            statusPane = new JPanel();</span>
+<span class="nc" id="L474">            statusPane.setLayout(new BoxLayout(statusPane, BoxLayout.X_AXIS));</span>
+<span class="nc" id="L475">            statusPane.add(getStatusField(), null);</span>
+            }
+<span class="nc" id="L477">        return statusPane;</span>
+        }
+    /**
+     * This method initializes jTextField   
+     *      
+     * @return javax.swing.JTextField       
+     */    
+    JTextField getStatusField() 
+        {
+<span class="nc bnc" id="L486" title="All 2 branches missed.">        if (statusField == null) </span>
+            {
+<span class="nc" id="L488">            statusField = new JTextField();</span>
+<span class="nc" id="L489">            statusField.setEditable(false);</span>
+            }
+<span class="nc" id="L491">        return statusField;</span>
+        }
+    public static void main(String[] args) 
+        {
+<span class="nc" id="L495">        Console application = new Console(args);</span>
+<span class="nc" id="L496">        application.setVisible(true);</span>
+<span class="nc" id="L497">        }</span>
+    
+    /**
+     * This method initializes this
+     * 
+     * @return void
+     */
+    void initialize() 
+        {
+<span class="nc" id="L506">        this.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);</span>
+<span class="nc" id="L507">        this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);</span>
+<span class="nc" id="L508">        this.setJMenuBar(getJJMenuBar());</span>
+<span class="nc" id="L509">        this.setContentPane(getJContentPane());</span>
+<span class="nc" id="L510">        this.setJMenuBar(getJJMenuBar());</span>
+<span class="nc" id="L511">        this.setContentPane(getJContentPane());</span>
+<span class="nc" id="L512">        this.setTitle(&quot;ECJ Console&quot;);</span>
+        
+<span class="nc bnc" id="L514" title="All 2 branches missed.">        for (int i = 0; i &lt; clArgs.length; i ++) {</span>
+<span class="nc bnc" id="L515" title="All 2 branches missed.">            if (clArgs[i].equalsIgnoreCase(&quot;file&quot;)) {</span>
+<span class="nc" id="L516">                File file = new File(clArgs[i+1]);</span>
+<span class="nc" id="L517">                loadParameters(file);</span>
+<span class="nc" id="L518">                playButton.setEnabled(true);</span>
+<span class="nc" id="L519">                stepButton.setEnabled(true);</span>
+<span class="nc" id="L520">                conPanel.enableControls();</span>
+                }
+            }
+<span class="nc" id="L523">        }</span>
+    /**
+     * This method initializes jContentPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    javax.swing.JPanel getJContentPane() 
+        {
+<span class="nc bnc" id="L531" title="All 2 branches missed.">        if(jContentPane == null) </span>
+            {
+<span class="nc" id="L533">            jContentPane = new javax.swing.JPanel();</span>
+<span class="nc" id="L534">            jContentPane.setLayout(new BorderLayout());</span>
+<span class="nc" id="L535">            jContentPane.add(getJTabbedPane(), java.awt.BorderLayout.CENTER);</span>
+<span class="nc" id="L536">            jContentPane.add(getJToolBar(), java.awt.BorderLayout.NORTH);</span>
+<span class="nc" id="L537">            jContentPane.add(getStatusPane(), java.awt.BorderLayout.SOUTH);</span>
+            }
+<span class="nc" id="L539">        return jContentPane;</span>
+        }
+    /**
+     * This method initializes jJMenuBar        
+     *  
+     * @return javax.swing.JMenuBar     
+     */    
+    javax.swing.JMenuBar getJJMenuBar() 
+        {
+<span class="nc bnc" id="L548" title="All 2 branches missed.">        if (jJMenuBar == null) </span>
+            {
+<span class="nc" id="L550">            jJMenuBar = new javax.swing.JMenuBar();</span>
+<span class="nc" id="L551">            jJMenuBar.add(getFileMenu());</span>
+<span class="nc" id="L552">            jJMenuBar.add(getHelpMenu());</span>
+            }
+<span class="nc" id="L554">        return jJMenuBar;</span>
+        }
+    /**
+     * This method initializes jMenu    
+     *  
+     * @return javax.swing.JMenu        
+     */    
+    javax.swing.JMenu getFileMenu() 
+        {
+<span class="nc bnc" id="L563" title="All 2 branches missed.">        if (fileMenu == null) </span>
+            {
+<span class="nc" id="L565">            fileMenu = new javax.swing.JMenu();</span>
+<span class="nc" id="L566">            fileMenu.setText(&quot;File&quot;);</span>
+<span class="nc" id="L567">            fileMenu.add(getLoadParametersMenuItem());</span>
+<span class="nc" id="L568">            fileMenu.add(getLoadCheckpointMenuItem());</span>
+<span class="nc" id="L569">            fileMenu.add(new JSeparator());</span>
+<span class="nc" id="L570">            fileMenu.add(getExitMenuItem());</span>
+            }
+<span class="nc" id="L572">        return fileMenu;</span>
+        }
+    /**
+     * This method initializes jMenu    
+     *  
+     * @return javax.swing.JMenu        
+     */    
+    javax.swing.JMenu getHelpMenu() 
+        {
+<span class="nc bnc" id="L581" title="All 2 branches missed.">        if (helpMenu == null) </span>
+            {
+<span class="nc" id="L583">            helpMenu = new javax.swing.JMenu();</span>
+<span class="nc" id="L584">            helpMenu.setText(&quot;Help&quot;);</span>
+<span class="nc" id="L585">            helpMenu.add(getAboutMenuItem());</span>
+            }
+<span class="nc" id="L587">        return helpMenu;</span>
+        }
+    /**
+     * This method initializes jMenuItem        
+     *  
+     * @return javax.swing.JMenuItem    
+     */    
+    javax.swing.JMenuItem getExitMenuItem() 
+        {
+<span class="nc bnc" id="L596" title="All 2 branches missed.">        if (exitMenuItem == null) </span>
+            {
+<span class="nc" id="L598">            exitMenuItem = new javax.swing.JMenuItem();</span>
+<span class="nc" id="L599">            exitMenuItem.setText(&quot;Exit&quot;);</span>
+<span class="nc" id="L600">            exitMenuItem.addActionListener(new java.awt.event.ActionListener() </span>
+<span class="nc" id="L601">                { </span>
+                public void actionPerformed(java.awt.event.ActionEvent e) 
+                    {    
+<span class="nc" id="L604">                    System.exit(0);</span>
+<span class="nc" id="L605">                    }</span>
+                });
+            }
+<span class="nc" id="L608">        return exitMenuItem;</span>
+        }
+    
+    JFrame aboutFrame;
+    
+    /**
+     * This method initializes jMenuItem        
+     *  
+     * @return javax.swing.JMenuItem    
+     */    
+    javax.swing.JMenuItem getAboutMenuItem() 
+        {
+<span class="nc bnc" id="L620" title="All 2 branches missed.">        if (aboutMenuItem == null) </span>
+            {
+<span class="nc" id="L622">            aboutMenuItem = new javax.swing.JMenuItem();</span>
+<span class="nc" id="L623">            aboutMenuItem.setText(&quot;About ECJ&quot;);</span>
+<span class="nc" id="L624">            aboutMenuItem.addActionListener(new java.awt.event.ActionListener() </span>
+<span class="nc" id="L625">                { </span>
+                public void actionPerformed(java.awt.event.ActionEvent e) 
+                    
+                    {    
+<span class="nc bnc" id="L629" title="All 2 branches missed.">                    if (aboutFrame == null)</span>
+                        
+                        {
+                        // construct the frame
+<span class="nc" id="L633">                        aboutFrame = new JFrame(&quot;About ECJ&quot;);</span>
+<span class="nc" id="L634">                        JPanel p = new JPanel();  // 1.3.1 only has borders for JComponents, not Boxes</span>
+<span class="nc" id="L635">                        p.setBorder(BorderFactory.createEmptyBorder(25,30,30,30));</span>
+<span class="nc" id="L636">                        Box b = new Box(BoxLayout.Y_AXIS);</span>
+<span class="nc" id="L637">                        p.add(b,BorderLayout.CENTER);</span>
+<span class="nc" id="L638">                        aboutFrame.getContentPane().add(p,BorderLayout.CENTER);</span>
+<span class="nc" id="L639">                        aboutFrame.setResizable(false);</span>
+<span class="nc" id="L640">                        Font small = new Font(&quot;Dialog&quot;,0,10);</span>
+
+                        // start dumping in text
+<span class="nc" id="L643">                        JLabel j = new JLabel(&quot;ECJ&quot;);</span>
+<span class="nc" id="L644">                        j.setFont(new Font(&quot;Serif&quot;,0,36));</span>
+<span class="nc" id="L645">                        b.add(j);</span>
+                                
+<span class="nc" id="L647">                        j = new JLabel(&quot;An Evolutionary Computation System&quot;);</span>
+<span class="nc" id="L648">                        b.add(j);</span>
+<span class="nc" id="L649">                        j = new JLabel(&quot;Version &quot; +Version.version);</span>
+<span class="nc" id="L650">                        b.add(j);</span>
+<span class="nc" id="L651">                        JLabel spacer = new JLabel(&quot; &quot;);</span>
+<span class="nc" id="L652">                        spacer.setFont(new Font(&quot;Dialog&quot;,0,6));</span>
+<span class="nc" id="L653">                        b.add(spacer);</span>
+
+<span class="nc" id="L655">                        j = new JLabel(&quot;By &quot; + Version.author);</span>
+<span class="nc" id="L656">                        b.add(j);</span>
+                        
+<span class="nc" id="L658">                        spacer = new JLabel(&quot; &quot;);</span>
+<span class="nc" id="L659">                        spacer.setFont(new Font(&quot;Dialog&quot;,0,6));</span>
+<span class="nc" id="L660">                        b.add(spacer);</span>
+                        
+<span class="nc" id="L662">                        j = new JLabel(&quot;Contributors:&quot;);</span>
+<span class="nc" id="L663">                        b.add(j);</span>
+<span class="nc" id="L664">                        j = new JLabel(&quot;     &quot; + Version.contributors);</span>
+<span class="nc" id="L665">                        b.add(j);</span>
+<span class="nc" id="L666">                        j = new JLabel(&quot;     &quot; + Version.contributors2);</span>
+<span class="nc" id="L667">                        b.add(j);</span>
+                            
+<span class="nc" id="L669">                        spacer = new JLabel(&quot; &quot;);</span>
+<span class="nc" id="L670">                        spacer.setFont(new Font(&quot;Dialog&quot;,0,6));</span>
+<span class="nc" id="L671">                        b.add(spacer);</span>
+                        
+                        // can't figure out why I need a second one...
+<span class="nc" id="L674">                        spacer = new JLabel(&quot; &quot;);</span>
+<span class="nc" id="L675">                        spacer.setFont(new Font(&quot;Dialog&quot;,0,6));</span>
+<span class="nc" id="L676">                        b.add(spacer);</span>
+
+<span class="nc" id="L678">                        j = new JLabel(&quot;ECJ's homepage is &quot; + Version.authorURL);</span>
+<span class="nc" id="L679">                        j.setFont(small);</span>
+<span class="nc" id="L680">                        b.add(j);</span>
+
+<span class="nc" id="L682">                        j = new JLabel(&quot;For help, send mail to &quot; + Version.authorEmail0 + &quot;@&quot; + </span>
+                            Version.authorEmail1);
+<span class="nc" id="L684">                        j.setFont(small);</span>
+<span class="nc" id="L685">                        b.add(j);</span>
+
+<span class="nc" id="L687">                        j = new JLabel(&quot;     &quot; + Version.authorEmail2);</span>
+<span class="nc" id="L688">                        j.setFont(small);</span>
+<span class="nc" id="L689">                        b.add(j);</span>
+
+<span class="nc" id="L691">                        spacer.setFont(new Font(&quot;Dialog&quot;,0,6));</span>
+<span class="nc" id="L692">                        b.add(spacer);</span>
+
+<span class="nc" id="L694">                        j = new JLabel(&quot;Version &quot; + Version.version + &quot; released on &quot; + Version.date + &quot;.&quot;);</span>
+<span class="nc" id="L695">                        j.setFont(small);</span>
+<span class="nc" id="L696">                        b.add(j);</span>
+
+<span class="nc" id="L698">                        String javaVersion = System.getProperties().getProperty(&quot;java.version&quot;);</span>
+<span class="nc" id="L699">                        j = new JLabel(&quot;Current Java: &quot; + javaVersion);</span>
+<span class="nc" id="L700">                        j.setFont(small);</span>
+<span class="nc" id="L701">                        b.add(j);</span>
+                        
+<span class="nc" id="L703">                        j = new JLabel(&quot;Minimum Java: &quot; + Version.minimumJavaVersion);</span>
+<span class="nc" id="L704">                        j.setFont(small);</span>
+<span class="nc" id="L705">                        b.add(j);</span>
+                                            
+<span class="nc" id="L707">                        aboutFrame.pack();</span>
+                        }
+                        
+                    // if not on screen right now, move to center of screen
+<span class="nc bnc" id="L711" title="All 2 branches missed.">                    if (!aboutFrame.isVisible())</span>
+                        
+                        {
+<span class="nc" id="L714">                        Dimension d = Toolkit.getDefaultToolkit().getScreenSize();</span>
+<span class="nc" id="L715">                        d.width -= aboutFrame.getWidth();</span>
+<span class="nc" id="L716">                        d.height -= aboutFrame.getHeight();</span>
+<span class="nc" id="L717">                        d.width /= 2;</span>
+<span class="nc" id="L718">                        d.height /= 2;</span>
+<span class="nc bnc" id="L719" title="All 2 branches missed.">                        if (d.width &lt; 0) d.width = 0;</span>
+<span class="nc bnc" id="L720" title="All 2 branches missed.">                        if (d.height &lt; 0) d.height = 0;</span>
+<span class="nc" id="L721">                        aboutFrame.setLocation(d.width,d.height);</span>
+                        }
+                    
+                    // show it!
+<span class="nc" id="L725">                    aboutFrame.setVisible(true);</span>
+<span class="nc" id="L726">                    }</span>
+                });
+            }
+<span class="nc" id="L729">        return aboutMenuItem;</span>
+        }
+    /**
+     * @param f
+     */
+    void loadParameters(File f) 
+        {
+        try 
+            {
+<span class="nc" id="L738">            parameters = new ParameterDatabase(f,clArgs);</span>
+            }
+<span class="nc" id="L740">        catch (FileNotFoundException ex) </span>
+            {
+<span class="nc" id="L742">            Output.initialError(</span>
+                &quot;A File Not Found Exception was generated upon &quot; +
+<span class="nc" id="L744">                &quot;reading the parameter file \&quot;&quot; + f.getPath() + </span>
+                &quot;\&quot;.\nHere it is:\n&quot; + ex, true);
+            }
+<span class="nc" id="L747">        catch (IOException ex) </span>
+            {
+<span class="nc" id="L749">            Output.initialError(</span>
+                &quot;An IO Exception was generated upon reading the &quot; +
+<span class="nc" id="L751">                &quot;parameter file \&quot;&quot; + f.getPath() + </span>
+                &quot;\&quot;.\nHere it is:\n&quot; + ex, true);
+<span class="nc" id="L753">            }</span>
+        
+<span class="nc bnc" id="L755" title="All 2 branches missed.">        if (parameters == null) </span>
+            {
+<span class="nc" id="L757">            Output.initialError(&quot;No parameter file was loaded&quot;, true);</span>
+            } else 
+            {
+<span class="nc" id="L760">            paramPanel.loadParameters();</span>
+<span class="nc" id="L761">            conPanel.loadParameters();</span>
+            }
+<span class="nc" id="L763">        }</span>
+    
+    void restoreFromCheckpoint(File checkpoint) 
+        {
+        try 
+            {
+<span class="nc" id="L769">            state=Checkpoint.restoreFromCheckpoint(checkpoint.getCanonicalPath());</span>
+<span class="nc" id="L770">            parameters = state.parameters;</span>
+<span class="nc" id="L771">            paramPanel.loadParameters();</span>
+<span class="nc" id="L772">            conPanel.loadParameters();</span>
+<span class="nc" id="L773">            paused = true;</span>
+<span class="nc" id="L774">            setStep(false);</span>
+<span class="nc" id="L775">            spawnPlayThread(true);</span>
+<span class="nc" id="L776">            stopButton.setEnabled(true);</span>
+            }
+<span class="nc" id="L778">        catch(OptionalDataException e) </span>
+            {
+<span class="nc" id="L780">            Output.initialError(</span>
+                &quot;A ClassNotFoundException was generated upon&quot; +
+                &quot;starting up from a checkpoint.&quot; +
+                &quot;\nHere it is:\n&quot; + e, true); 
+            }
+<span class="nc" id="L785">        catch(ClassNotFoundException e) </span>
+            {
+<span class="nc" id="L787">            Output.initialError(</span>
+                &quot;A ClassNotFoundException was generated upon&quot; +
+                &quot;starting up from a checkpoint.&quot; +
+                &quot;\nHere it is:\n&quot; + e, true); 
+            }
+<span class="nc" id="L792">        catch (IOException e) </span>
+            { 
+<span class="nc" id="L794">            Output.initialError(</span>
+                &quot;An IO Exception was generated upon&quot; +
+                &quot;starting up, probably in setting up a log&quot; +
+                &quot;\nHere it is:\n&quot; + e, true); 
+<span class="nc" id="L798">            }</span>
+<span class="nc" id="L799">        }</span>
+    
+    boolean threadIsToStop;
+    
+    void tellThreadToStop() 
+        {
+<span class="nc" id="L805">        threadIsToStop = true;</span>
+<span class="nc" id="L806">        }</span>
+    
+    void setStep(boolean step) 
+        {
+<span class="nc" id="L810">        _step = step;</span>
+<span class="nc" id="L811">        }</span>
+    
+    boolean isThreadToStop() 
+        {
+<span class="nc" id="L815">        return threadIsToStop;</span>
+        }
+    
+<span class="nc" id="L818">    boolean _step = false;</span>
+    
+    boolean getStep() 
+        {
+<span class="nc" id="L822">        return _step;</span>
+        }
+    
+    void setPaused(boolean paused) 
+        {
+<span class="nc" id="L827">        this.paused = paused;</span>
+<span class="nc" id="L828">        }</span>
+    
+    boolean isPaused() 
+        {
+<span class="nc" id="L832">        return paused;</span>
+        }
+    
+    void spawnPlayThread(final boolean rfc) 
+        {
+<span class="nc" id="L837">        threadIsToStop = false;</span>
+        
+<span class="nc" id="L839">        Runnable run = new Runnable() </span>
+<span class="nc" id="L840">            {</span>
+<span class="nc" id="L841">            Vector&lt;EvolutionStateListener&gt; listeners = new Vector&lt;&gt;();</span>
+<span class="nc" id="L842">            boolean restoreFromCheckpoint = rfc;</span>
+            
+            void addListener(EvolutionStateListener l) 
+                {
+<span class="nc" id="L846">                listeners.add(l);</span>
+<span class="nc" id="L847">                }</span>
+            
+
+            
+            void firePostEvolutionStep() 
+                {
+<span class="nc" id="L853">                EvolutionStateEvent evt = new EvolutionStateEvent(this);</span>
+<span class="nc" id="L854">                Iterator&lt;EvolutionStateListener&gt; it = listeners.iterator();</span>
+<span class="nc bnc" id="L855" title="All 2 branches missed.">                while (it.hasNext()) </span>
+                    {
+<span class="nc" id="L857">                    EvolutionStateListener l = it.next();</span>
+<span class="nc" id="L858">                    l.postEvolution(evt);</span>
+<span class="nc" id="L859">                    }</span>
+<span class="nc" id="L860">                }</span>
+            
+            void restoreFromCheckpoint() 
+                {
+<span class="nc" id="L864">                state.startFromCheckpoint();</span>
+<span class="nc" id="L865">                statisticsPane.removeAll();</span>
+<span class="nc" id="L866">                setupChartPanes();</span>
+<span class="nc" id="L867">                setupInspectionPanes();</span>
+<span class="nc" id="L868">                }</span>
+            
+            /**
+             * @throws BadParameterException
+             * @throws ParamClassLoadException
+             */
+            void initializeEvolutionState()
+                throws BadParameterException, ParamClassLoadException 
+                {
+<span class="nc" id="L877">                listeners.removeAllElements();</span>
+<span class="nc" id="L878">                Output output = initializeOutput();</span>
+                
+                // 2. set up thread values
+                /*
+                  int breedthreads = parameters.getInt(
+                  new Parameter(Evolve.P_BREEDTHREADS),null,1);
+                  if (breedthreads &lt; 1)
+                  Output.initialError(&quot;Number of breeding threads should be an integer &gt;0.&quot;,
+                  new Parameter(Evolve.P_BREEDTHREADS), true);
+                
+                  int evalthreads = parameters.getInt(
+                  new Parameter(Evolve.P_EVALTHREADS),null,1);
+                  if (evalthreads &lt; 1)
+                  Output.initialError(&quot;Number of eval threads should be an integer &gt;0.&quot;,
+                  new Parameter(Evolve.P_EVALTHREADS), true);
+                */
+                
+<span class="nc" id="L895">                int breedthreads = Evolve.determineThreads(output, parameters, new Parameter(Evolve.P_BREEDTHREADS));</span>
+<span class="nc" id="L896">                int evalthreads = Evolve.determineThreads(output, parameters, new Parameter(Evolve.P_EVALTHREADS));</span>
+                
+                // 3. create the Mersenne Twister random number generators,
+                // one per thread
+<span class="nc bnc" id="L900" title="All 2 branches missed.">                MersenneTwisterFast[] random = new MersenneTwisterFast[breedthreads &gt; evalthreads ? </span>
+<span class="nc" id="L901">                    breedthreads : evalthreads];</span>
+<span class="nc bnc" id="L902" title="All 2 branches missed.">                int[] seeds = new int[breedthreads &gt; evalthreads ? </span>
+<span class="nc" id="L903">                    breedthreads : evalthreads];</span>
+                
+<span class="nc" id="L905">                String seed_message = &quot;Seed: &quot;;</span>
+<span class="nc bnc" id="L906" title="All 2 branches missed.">                for (int x=0;x&lt;random.length;x++)</span>
+                    
+                    {
+<span class="nc" id="L909">                    seeds[x] = conPanel.getSeed(currentJob,x);</span>
+<span class="nc" id="L910">                    seed_message = seed_message + seeds[x] + &quot; &quot;;</span>
+                    }
+                
+<span class="nc bnc" id="L913" title="All 2 branches missed.">                for (int x=0;x&lt;random.length;x++)</span>
+                    
+                    {
+<span class="nc bnc" id="L916" title="All 2 branches missed.">                    for (int y=x+1;y&lt;random.length;y++)</span>
+<span class="nc bnc" id="L917" title="All 2 branches missed.">                        if (seeds[x]==seeds[y])</span>
+                            
+                            {
+<span class="nc" id="L920">                            Output.initialError(Evolve.P_SEED+&quot;.&quot;+x+&quot; (&quot;+seeds[x]+&quot;) and &quot;+Evolve.P_SEED+&quot;.&quot;+y+&quot; (&quot;+seeds[y]+&quot;) ought not be the same seed.&quot;, true); </span>
+                            }
+<span class="nc" id="L922">                    random[x] = Evolve.primeGenerator(new MersenneTwisterFast(seeds[x]));   // we prime the generator to be more sure of randomness.</span>
+                    }
+                
+<span class="nc" id="L925">                state = (EvolutionState)parameters.getInstanceForParameter(</span>
+                    new Parameter(Evolve.P_STATE),null,EvolutionState.class);
+                
+<span class="nc" id="L928">                state.parameters = parameters;</span>
+<span class="nc" id="L929">                state.random = random;</span>
+<span class="nc" id="L930">                state.output = output;</span>
+<span class="nc" id="L931">                String jobFilePrefix = Console.this.conPanel.getJobFilePrefix();</span>
+<span class="nc bnc" id="L932" title="All 2 branches missed.">                if (Console.this.conPanel.getNumJobs() &gt; 1) </span>
+                    {
+<span class="nc bnc" id="L934" title="All 4 branches missed.">                    if (jobFilePrefix == null || jobFilePrefix.length()&lt;1) </span>
+                        {
+<span class="nc" id="L936">                        jobFilePrefix = &quot;job&quot;;</span>
+                        }
+<span class="nc" id="L938">                    jobFilePrefix = jobFilePrefix+&quot;.&quot;+Console.this.currentJob+&quot;.&quot;;</span>
+<span class="nc" id="L939">                    state.output.setFilePrefix(jobFilePrefix);</span>
+                    }
+                
+<span class="nc" id="L942">                state.evalthreads = evalthreads;</span>
+<span class="nc" id="L943">                state.breedthreads = breedthreads;</span>
+                
+<span class="nc" id="L945">                output.systemMessage(&quot;Threads:  breed/&quot; + breedthreads + &quot; eval/&quot; + evalthreads);</span>
+<span class="nc" id="L946">                output.systemMessage(seed_message);</span>
+                
+<span class="nc" id="L948">                state.startFresh();</span>
+
+<span class="nc bnc" id="L950" title="All 2 branches missed.">                if (Console.this.conPanel.getNumJobs() &gt; 0) </span>
+                    {
+<span class="nc" id="L952">                    state.checkpointPrefix = jobFilePrefix+state.checkpointPrefix;</span>
+                    }
+
+<span class="nc bnc" id="L955" title="All 2 branches missed.">                if (currentJob == 0) </span>
+                    {
+<span class="nc" id="L957">                    statisticsPane.removeAll();</span>
+                    }
+                
+<span class="nc" id="L960">                setupChartPanes();</span>
+<span class="nc" id="L961">                setupInspectionPanes();</span>
+<span class="nc" id="L962">                }</span>
+            
+            /**
+             * @throws NumberFormatException
+             * @throws BadParameterException
+             */
+            void setupInspectionPanes()
+                throws NumberFormatException, BadParameterException 
+                {
+<span class="nc" id="L971">                inspectionPane.removeAll();</span>
+                // Setup the Evolution State inspection pane
+<span class="nc" id="L973">                JScrollPane stateInspectionPane = new JScrollPane();</span>
+<span class="nc" id="L974">                JTree stateInspectionTree = new JTree(</span>
+                    new ReflectedObject(Console.this.state));
+<span class="nc" id="L976">                stateInspectionPane.setViewportView(stateInspectionTree);</span>
+<span class="nc" id="L977">                inspectionPane.add(&quot;Evolution State&quot;, stateInspectionPane);</span>
+                
+                // Setup the subpopulation inspection panes
+<span class="nc" id="L980">                Parameter p_subPops = new Parameter(&quot;pop.subpops&quot;);</span>
+<span class="nc" id="L981">                int numSubPops = parameters.getInt(p_subPops,null);</span>
+<span class="nc bnc" id="L982" title="All 2 branches missed.">                for (int subPop = 0; subPop &lt; numSubPops; ++subPop) </span>
+                    {
+<span class="nc" id="L984">                    SubpopulationPanel subPopPane = new SubpopulationPanel(Console.this, subPop);</span>
+<span class="nc" id="L985">                    subPopPane.setup(Console.this.state,p_subPops.push(&quot;&quot;+subPop));</span>
+<span class="nc" id="L986">                    inspectionPane.add(&quot;SubPop &quot;+subPop, subPopPane);</span>
+<span class="nc" id="L987">                    addListener(subPopPane);</span>
+                    }
+<span class="nc" id="L989">                }</span>
+
+            /**
+             * @throws BadParameterException
+             */
+            void setupChartPanes()
+                throws BadParameterException 
+                {
+                // Set up statistics charts (if any)
+<span class="nc" id="L998">                StatisticsChartPane statPane = new StatisticsChartPane();</span>
+<span class="nc" id="L999">                statPane.setup(state, new Parameter(&quot;stat&quot;));</span>
+<span class="nc bnc" id="L1000" title="All 2 branches missed.">                if (statPane.numCharts &gt; 0)</span>
+<span class="nc" id="L1001">                    statisticsPane.addTab(&quot;Job &quot;+currentJob, statPane);</span>
+<span class="nc" id="L1002">                }</span>
+
+            public void run() 
+                {
+                
+                try 
+                    {
+<span class="nc bnc" id="L1009" title="All 2 branches missed.">                    while (currentJob &lt; conPanel.getNumJobs()) </span>
+                        {
+<span class="nc bnc" id="L1011" title="All 2 branches missed.">                        if (!restoreFromCheckpoint)</span>
+<span class="nc" id="L1012">                            initializeEvolutionState();</span>
+                        else
+<span class="nc" id="L1014">                            restoreFromCheckpoint();</span>
+<span class="nc" id="L1015">                        state.output.message(&quot;\nJob &quot;+currentJob);</span>
+                        
+<span class="nc" id="L1017">                        result = EvolutionState.R_NOTDONE;</span>
+<span class="nc bnc" id="L1018" title="All 2 branches missed.">                        while (result == EvolutionState.R_NOTDONE &amp;&amp;</span>
+<span class="nc bnc" id="L1019" title="All 2 branches missed.">                            !Thread.currentThread().isInterrupted() &amp;&amp;</span>
+<span class="nc bnc" id="L1020" title="All 2 branches missed.">                            !isThreadToStop()) </span>
+                            {
+                            
+                            try 
+                                {
+<span class="nc" id="L1025">                                synchronized (playThread) </span>
+                                    {
+<span class="nc bnc" id="L1027" title="All 4 branches missed.">                                    while (isPaused() &amp;&amp; ! getStep()) </span>
+                                        {
+<span class="nc" id="L1029">                                        playThread.wait();</span>
+                                        }
+<span class="nc" id="L1031">                                    }</span>
+                                }
+<span class="nc" id="L1033">                            catch (InterruptedException e) </span>
+                                {
+                                // This can happen if the play thread is stopped 
+                                // while paused
+<span class="nc" id="L1037">                                }</span>
+                            
+<span class="nc bnc" id="L1039" title="All 2 branches missed.">                            if (!Thread.currentThread().isInterrupted() &amp;&amp;</span>
+<span class="nc bnc" id="L1040" title="All 2 branches missed.">                                !isThreadToStop()) </span>
+                                {
+<span class="nc" id="L1042">                                result = state.evolve();</span>
+<span class="nc" id="L1043">                                firePostEvolutionStep();</span>
+<span class="nc" id="L1044">                                Console.this.getStatusField().setText(&quot;Job: &quot;+currentJob+&quot; Generation: &quot;+state.generation);</span>
+<span class="nc" id="L1045">                                setStep(false);</span>
+                                }
+                            }
+                        
+                        /*
+                         * If the play thread has been interrupted before the experiment
+                         * has completed, consider the experiment a failure.
+                         */
+<span class="nc bnc" id="L1053" title="All 2 branches missed.">                        if (result == EvolutionState.R_NOTDONE)</span>
+<span class="nc" id="L1054">                            result = EvolutionState.R_FAILURE;</span>
+                        
+<span class="nc bnc" id="L1056" title="All 4 branches missed.">                        if (state != null &amp;&amp; result != EvolutionState.R_NOTDONE) </span>
+                            {
+<span class="nc" id="L1058">                            state.finish(result);</span>
+                            }
+                        
+<span class="nc" id="L1061">                        currentJob++;</span>
+                        }
+                    }
+<span class="nc" id="L1064">                catch (Exception e) // just in case there's a RuntimeException thrown</span>
+                    {
+<span class="nc" id="L1066">                    System.err.println(&quot;Exception when running job:\n\t&quot;);</span>
+<span class="nc" id="L1067">                    e.printStackTrace();</span>
+<span class="nc" id="L1068">                    }</span>
+                
+<span class="nc" id="L1070">                conPanel.enableControls();</span>
+<span class="nc" id="L1071">                finishAndCleanup();</span>
+<span class="nc" id="L1072">                }</span>
+            };
+        
+<span class="nc" id="L1075">        playThread = new Thread(run);</span>
+<span class="nc" id="L1076">        playThread.start();</span>
+<span class="nc" id="L1077">        }</span>
+    
+    /**
+     * @return
+     * @throws BadParameterException
+     */
+    Output initializeOutput()
+        throws BadParameterException 
+        {
+        // 1. create the output
+        //boolean store = parameters.getBoolean(new Parameter(Evolve.P_STORE),null,false);
+        
+<span class="nc" id="L1089">        Output output = new Output(true);</span>
+        //output.setFlush(
+        //    parameters.getBoolean(new Parameter(Evolve.P_FLUSH),null,false));
+        
+        
+        // stdout is always log #0.  stderr is always log #1.
+        // stderr accepts announcements, and both are fully verbose 
+        // by default.
+<span class="nc" id="L1097">        output.addLog(ec.util.Log.D_STDOUT,false);</span>
+<span class="nc" id="L1098">        output.addLog(ec.util.Log.D_STDERR,true);</span>
+<span class="nc" id="L1099">        output.systemMessage(Version.message());</span>
+<span class="nc" id="L1100">        return output;</span>
+        }
+    
+    /**
+     * Pauses the background play thread.
+     *
+     */
+    void pausePlayThread() 
+        {
+<span class="nc" id="L1109">        setPaused(true);</span>
+<span class="nc" id="L1110">        }</span>
+    
+    void resumePlayThread() 
+        {
+<span class="nc" id="L1114">        synchronized (playThread) </span>
+            {
+<span class="nc" id="L1116">            setPaused(false);</span>
+<span class="nc" id="L1117">            playThread.notify();</span>
+<span class="nc" id="L1118">            }</span>
+<span class="nc" id="L1119">        }</span>
+    
+    /**
+     * 
+     */
+    void killPlayThread() 
+        {
+<span class="nc" id="L1126">        tellThreadToStop();</span>
+        
+        try 
+            {
+<span class="nc bnc" id="L1130" title="All 2 branches missed.">            if (playThread != null) </span>
+                {
+<span class="nc bnc" id="L1132" title="All 2 branches missed.">                while (playThread.isAlive()) </span>
+                    {
+                    try 
+                        {
+<span class="nc" id="L1136">                        playThread.interrupt();</span>
+                        } 
+                    // Ignore security exceptions resulting from
+                    // attempting to interrupt a thread.
+                    // TODO Explain this better.
+<span class="nc" id="L1141">                    catch (SecurityException ex) { }</span>
+<span class="nc" id="L1142">                    playThread.join(50);</span>
+                    }
+                
+<span class="nc" id="L1145">                playThread = null;</span>
+                }
+            }
+<span class="nc" id="L1148">        catch (InterruptedException ex) </span>
+            {
+<span class="nc" id="L1150">            System.out.println(&quot;Interrupted while killing the play thread.  Shouldn't happen.&quot;);</span>
+<span class="nc" id="L1151">            }</span>
+<span class="nc" id="L1152">        }</span>
+    
+    /**
+     * 
+     */
+    void finishAndCleanup() 
+        {
+<span class="nc" id="L1159">        synchronized(cleanupLock) </span>
+            {
+<span class="nc" id="L1161">            stopButton.setEnabled(false);</span>
+<span class="nc" id="L1162">            pauseButton.setEnabled(false);</span>
+<span class="nc" id="L1163">            stepButton.setEnabled(true);</span>
+<span class="nc" id="L1164">            playButton.setEnabled(true);</span>
+<span class="nc" id="L1165">            paused = false;</span>
+<span class="nc" id="L1166">            playing = false;</span>
+<span class="nc" id="L1167">            _step = false;</span>
+<span class="nc" id="L1168">            currentJob = 0;</span>
+<span class="nc" id="L1169">            }</span>
+<span class="nc" id="L1170">        }</span>
+    
+    int result;
+<span class="nc" id="L1173">    JMenuItem loadCheckpointMenuItem = null;</span>
+<span class="nc" id="L1174">    JTabbedPane statisticsPane = null;</span>
+<span class="nc" id="L1175">    JTabbedPane inspectionPane = null;</span>
+<span class="nc" id="L1176">    JPanel statusPane = null;</span>
+<span class="nc" id="L1177">    JTextField statusField = null;</span>
+    }  //  @jve:decl-index=0:visual-constraint=&quot;21,10&quot;
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

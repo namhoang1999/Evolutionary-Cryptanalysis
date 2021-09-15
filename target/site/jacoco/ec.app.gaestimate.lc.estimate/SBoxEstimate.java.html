@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SBoxEstimate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.gaestimate.lc.estimate</a> &gt; <span class="el_source">SBoxEstimate.java</span></div><h1>SBoxEstimate.java</h1><pre class="source lang-java linenums">package ec.app.gaestimate.lc.estimate;
+
+public class SBoxEstimate {
+    public int[] plaintext, ciphertext; 
+    public int plaintextMask, ciphertextMask, position; // 16-bit mask position
+<span class="nc" id="L6">    public final int SIZE = 3000;</span>
+
+<span class="nc" id="L8">    public SBoxEstimate(String path) {</span>
+        //&quot;data/data0.txt&quot;
+<span class="nc" id="L10">        int[] data = Helper.readFile(path, SIZE);</span>
+<span class="nc" id="L11">        plaintext  = new int[data.length];</span>
+<span class="nc" id="L12">        ciphertext = new int[data.length];</span>
+
+<span class="nc bnc" id="L14" title="All 2 branches missed.">        for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="nc" id="L15">            plaintext[i]  = data[i] &gt;&gt; 16;</span>
+<span class="nc" id="L16">            ciphertext[i] = data[i] &amp; 0xff;</span>
+        }
+<span class="nc" id="L18">    }</span>
+
+    public double estimate() {
+<span class="nc bnc" id="L21" title="All 4 branches missed.">        if (plaintextMask == 0 || ciphertextMask == 0) return 0;</span>
+<span class="nc" id="L22">        double approximation = 0;</span>
+<span class="nc" id="L23">        double best = 0;</span>
+<span class="nc bnc" id="L24" title="All 2 branches missed.">        if (Helper.bitSum(this.position) == 1) {</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            for (int a = 1; a &lt;= 0b1111; a++) {</span>
+<span class="nc" id="L26">                int activeSboxMask = activeSBox(this.position);</span>
+<span class="nc" id="L27">                int subKeyBits = generateMask(activeSboxMask, a, 0, 0, 0);</span>
+<span class="nc" id="L28">                int mask = generateMask(activeSboxMask, 0xf, 0, 0, 0);</span>
+<span class="nc" id="L29">                approximation = bestBias(subKeyBits,mask);</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">                if (approximation &gt; best) best = approximation;</span>
+            }
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        } else if (Helper.bitSum(this.position) == 2) {</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">            for (int a = 1; a &lt;= 0b1111; a++) {</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">                for (int b = 1; b &lt;= 0b1111; b++) {</span>
+<span class="nc" id="L35">                    int activeSboxMask = activeSBox(this.position);</span>
+<span class="nc" id="L36">                    int subKeyBits = generateMask(activeSboxMask, a, b, 0, 0);</span>
+<span class="nc" id="L37">                    int mask = generateMask(activeSboxMask, 0xf, 0xf, 0, 0);</span>
+<span class="nc" id="L38">                    approximation = bestBias(subKeyBits,mask);</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">                    if (approximation &gt; best) best = approximation;</span>
+                }   
+            }
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        } else if (Helper.bitSum(this.position) == 3) {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">            for (int a = 1; a &lt;= 0b1111; a++) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">                for (int b = 1; b &lt;= 0b1111; b++) {</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">                    for (int c = 1; c &lt;= 0b1111; c++) {</span>
+<span class="nc" id="L46">                        int activeSboxMask = activeSBox(this.position);</span>
+<span class="nc" id="L47">                        int subKeyBits = generateMask(activeSboxMask, a, b, c, 0);</span>
+<span class="nc" id="L48">                        int mask = generateMask(activeSboxMask, 0xf, 0xf, 0xf, 0);</span>
+<span class="nc" id="L49">                        approximation = bestBias(subKeyBits,mask);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">                        if (approximation &gt; best) best = approximation;</span>
+                    }
+                }   
+            }
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        } else if (Helper.bitSum(this.position) == 4) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            for (int a = 1; a &lt;= 0b1111; a++) {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                for (int b = 1; b &lt;= 0b1111; b++) {</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                    for (int c = 1; c &lt;= 0b1111; c++) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                        for (int d = 1; d &lt;= 0b1111; d++) {</span>
+<span class="nc" id="L59">                            int activeSboxMask = activeSBox(this.position);</span>
+<span class="nc" id="L60">                            int subKeyBits = generateMask(activeSboxMask, a, b, c, d);</span>
+<span class="nc" id="L61">                            int mask = generateMask(activeSboxMask, 0xf, 0xf, 0xf, 0xf);</span>
+<span class="nc" id="L62">                            approximation = bestBias(subKeyBits,mask);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                            if (approximation &gt; best) best = approximation;</span>
+                        }
+                    }
+                }   
+            }
+        }
+        // return Math.abs(best-1500)/3000;
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (best == 0) return 0;</span>
+<span class="nc" id="L71">        return Math.abs(best-1500)/3000;</span>
+    }
+
+    public double bestBias(int k, int m) {
+<span class="nc bnc" id="L75" title="All 4 branches missed.">        if ((plaintextMask == 0) || (ciphertextMask == 0)) return 0;</span>
+<span class="nc" id="L76">        int a = 0, count = 0;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (int i = 0; i &lt; ciphertext.length; i++) {</span>
+<span class="nc" id="L78">            a = ciphertext[i] &amp; m;</span>
+<span class="nc" id="L79">            a = a ^ k;</span>
+<span class="nc" id="L80">            a = HeysCipher.sBoxEncrypt(a, false);</span>
+
+<span class="nc" id="L82">            count += Helper.bitXOR(plaintextMask &amp; plaintext[i]) ^ Helper.bitXOR(ciphertextMask &amp; ciphertext[i]); </span>
+        }
+<span class="nc" id="L84">        return count;</span>
+    }
+
+    public int activeSBox(int n) {
+<span class="nc" id="L88">        int mask = 0;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        for (int i = 0; i &lt; 16; i+= 4) </span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (((n &gt;&gt; i) &amp; 0xf) &gt; 0) mask = Helper.setBit(mask, i/4, 1);</span>
+<span class="nc" id="L91">        return mask;</span>
+    }
+
+    public int generateMask(int n, int a, int b, int c, int d) {
+<span class="nc" id="L95">        int[] arr = new int[]{a,b,c,d};</span>
+<span class="nc" id="L96">        int next = 0, out = 0;</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        for (int i = 3; i &gt;= 0; i--) {</span>
+<span class="nc" id="L98">            int bit = Helper.getBit(n, i);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            if (bit == 1) {</span>
+<span class="nc" id="L100">                out ^= arr[next] &lt;&lt; (4*i);</span>
+<span class="nc" id="L101">                next++;</span>
+<span class="nc bnc" id="L102" title="All 4 branches missed.">                if ((next == arr.length) || (arr[next] == 0)) return out;</span>
+            } 
+        }
+<span class="nc" id="L105">        return out;</span>
+    }
+
+    public void setPosition(boolean[] a) {
+<span class="nc" id="L109">        this.position = 0;</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        for (int i = 0; i &lt; a.length; ++i) </span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            if (a[i]) this.position ^= 1 &lt;&lt; (a.length - i - 1);</span>
+        
+<span class="nc" id="L113">        plaintextMask  = this.position &gt;&gt; 16;</span>
+<span class="nc" id="L114">        ciphertextMask = this.position &amp; 0xff;</span>
+<span class="nc" id="L115">    }</span>
+
+    public void setPosition(int a) {
+<span class="nc" id="L118">        this.position = a;</span>
+<span class="nc" id="L119">        plaintextMask  = this.position &gt;&gt; 16;</span>
+<span class="nc" id="L120">        ciphertextMask = this.position &amp; 0xff;</span>
+<span class="nc" id="L121">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

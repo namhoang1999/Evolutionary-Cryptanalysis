@@ -1,0 +1,63 @@
+# Copyright 2006 by Sean Luke and George Mason University
+# Licensed under the Academic Free License version 3.0
+# See the file "LICENSE" for more information
+
+# The parameters that were laid out in Tutorial 1 (see the documentation)
+print-unaccessed-params = true
+
+evalthreads = auto
+breedthreads = auto
+
+state		= ec.simple.SimpleEvolutionState
+
+pop		= ec.Population
+init		= ec.simple.SimpleInitializer
+finish		= ec.simple.SimpleFinisher
+breed		= ec.simple.SimpleBreeder
+eval		= ec.simple.SimpleEvaluator
+stat		= ec.simple.SimpleStatistics
+exch		= ec.simple.SimpleExchanger
+
+generations		= 50
+quit-on-run-complete	= true
+checkpoint		= false
+checkpoint-prefix	= ec
+checkpoint-modulo	= 1
+
+stat.file		= $out.stat
+
+pop.subpops		= 1
+pop.subpop.0		= ec.Subpopulation
+
+pop.subpop.0.size 		= 256
+pop.subpop.0.duplicate-retries 	= 0
+pop.subpop.0.species 		= ec.vector.BitVectorSpecies
+
+pop.subpop.0.species.fitness 	= ec.simple.SimpleFitness
+pop.subpop.0.species.ind	= ec.vector.BitVectorIndividual
+
+pop.subpop.0.species.genome-size	= 32
+pop.subpop.0.species.crossover-type	= two
+pop.subpop.0.species.mutation-type	= flip
+pop.subpop.0.species.mutation-prob	= 0.05
+
+breed.elite-fraction.0 = 0.05
+
+# Use our own custom mutation class
+#pop.subpop.0.species.pipe           = ec.app.galcevolve.OurMutatorPipeline
+pop.subpop.0.species.pipe			    = ec.vector.breed.VectorMutationPipeline
+pop.subpop.0.species.pipe.source.0		= ec.vector.breed.VectorCrossoverPipeline
+pop.subpop.0.species.pipe.source.0.source.0	= ec.select.TournamentSelection
+pop.subpop.0.species.pipe.source.0.source.1	= ec.select.TournamentSelection
+
+# Use our own custom mutation class
+#pop.subpop.0.species.pipe                   = ec.app.gaevolve.OurMutatorPipeline
+#pop.subpop.0.species.pipe.source.0			= ec.vector.breed.VectorMutationPipeline
+#pop.subpop.0.species.pipe.source.0.source.0		= ec.vector.breed.VectorCrossoverPipeline
+#pop.subpop.0.species.pipe.source.0.source.0.source.0	= ec.select.TournamentSelection
+#pop.subpop.0.species.pipe.source.0.source.0.source.1	= ec.select.TournamentSelection
+
+select.tournament.size		= 2
+
+eval.problem		        = ec.app.gaestimate.dc.MaxOnes
+eval.problem.path           = data/data0.txt

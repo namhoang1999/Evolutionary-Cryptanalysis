@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextPosition.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.gpevolve.dc.internals</a> &gt; <span class="el_source">NextPosition.java</span></div><h1>NextPosition.java</h1><pre class="source lang-java linenums">package ec.app.gpevolve.dc.internals;
+import ec.*;
+import ec.app.gpevolve.dc.*;
+import ec.gp.*;
+
+<span class="nc" id="L6">public class NextPosition extends GPNode {</span>
+    public String toString() {
+<span class="nc" id="L8">        return &quot;NextP&quot;;</span>
+    }
+
+    /*
+      public void checkConstraints(final EvolutionState state,
+      final int tree,
+      final GPIndividual typicalIndividual,
+      final Parameter individualBase)
+      {
+      super.checkConstraints(state,tree,typicalIndividual,individualBase);
+      if (children.length!=2)
+      state.output.error(&quot;Incorrect number of children for node &quot; + 
+      toStringForError() + &quot; at &quot; +
+      individualBase);
+      }
+    */
+    public int expectedChildren() {
+<span class="nc" id="L25">        return 1;</span>
+    }
+
+    public void eval(final EvolutionState state,
+        final int thread,
+        final GPData input,
+        final ADFStack stack,
+        final GPIndividual individual,
+        final Problem problem) {
+<span class="nc" id="L34">        Differential p = (Differential)problem;</span>
+<span class="nc" id="L35">        DifferentialData d = (DifferentialData) input;</span>
+
+<span class="nc" id="L37">        p.x = (p.x + 1) % Differential.maxX;</span>
+<span class="nc" id="L38">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

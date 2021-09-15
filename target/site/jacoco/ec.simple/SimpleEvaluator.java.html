@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimpleEvaluator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.simple</a> &gt; <span class="el_source">SimpleEvaluator.java</span></div><h1>SimpleEvaluator.java</h1><pre class="source lang-java linenums">/*
+  Copyright 2006 by Sean Luke
+  Licensed under the Academic Free License version 3.0
+  See the file &quot;LICENSE&quot; for more information
+*/
+
+
+package ec.simple;
+import java.util.ArrayList;
+
+import ec.*;
+import ec.coevolve.GroupedProblemForm;
+import ec.util.*;
+import ec.gp.ge.*;
+
+/* 
+ * SimpleEvaluator.java
+ * 
+ * Created: Wed Aug 18 21:31:18 1999
+ * By: Sean Luke
+ */
+
+/**
+ * The SimpleEvaluator is a simple, non-coevolved generational evaluator which
+ * evaluates every single member of every subpopulation individually in its
+ * own problem space.  One Problem instance is cloned from p_problem for
+ * each evaluating thread, and chunks of individuals are sent to each thread
+ * for evaluation.
+ * 
+ * The Problem must implement either SimpleProblemForm or GroupedProblemForm.  
+ * If a GroupedProblemForm is provided, then an entire chunk of individuals is 
+ * sent to the problem to be evaluated together in a batch.  If a SimpleProblemForm
+ * is provided, then each thread sends individuals sequentially to be evaluated
+ * one-at-a-time.
+ *
+ * @author Sean Luke
+ * @author Eric Scott
+ * @version 2.0 
+ *
+ * Thanks to Ralf Buschermohle &lt;lobequadrat@googlemail.com&gt; for early versions
+ * of code which led to this version.
+ *
+ */
+
+<span class="fc" id="L45">public class SimpleEvaluator extends Evaluator</span>
+    {
+    private static final long serialVersionUID = 1;
+    
+    public static final String P_CLONE_PROBLEM = &quot;clone-problem&quot;;
+    public static final String P_NUM_TESTS = &quot;num-tests&quot;;
+    public static final String P_MERGE = &quot;merge&quot;;
+
+    public static final String V_MEAN = &quot;mean&quot;;
+    public static final String V_MEDIAN = &quot;median&quot;;
+    public static final String V_BEST = &quot;best&quot;;
+        
+    public static final String P_CHUNK_SIZE = &quot;chunk-size&quot;;
+    public static final String V_AUTO = &quot;auto&quot;;
+
+    public static final int MERGE_MEAN = 0;
+    public static final int MERGE_MEDIAN = 1;
+    public static final int MERGE_BEST = 2;
+
+<span class="fc" id="L64">    public int numTests = 1;</span>
+<span class="fc" id="L65">    public int mergeForm = MERGE_MEAN;</span>
+    public boolean cloneProblem;
+
+<span class="fc" id="L68">    Object[] lock = new Object[0];          // Arrays are serializable</span>
+<span class="fc" id="L69">    int individualCounter = 0;</span>
+<span class="fc" id="L70">    int subPopCounter = 0;</span>
+    int chunkSize;  // a value &gt;= 1, or C_AUTO
+    public static final int C_AUTO = 0;
+        
+<span class="fc" id="L74">    public ThreadPool pool = new ThreadPool();</span>
+
+    public void setup(final EvolutionState state, final Parameter base)
+        {
+<span class="fc" id="L78">        super.setup(state,base);</span>
+
+<span class="fc" id="L80">        cloneProblem =state.parameters.getBoolean(base.push(P_CLONE_PROBLEM), null, true);</span>
+<span class="pc bpc" id="L81" title="3 of 4 branches missed.">        if (!cloneProblem &amp;&amp; (state.breedthreads &gt; 1)) // uh oh, this can't be right</span>
+<span class="nc" id="L82">            state.output.fatal(&quot;The Evaluator is not cloning its Problem, but you have more than one thread.&quot;, base.push(P_CLONE_PROBLEM));</span>
+
+<span class="fc" id="L84">        numTests = state.parameters.getInt(base.push(P_NUM_TESTS), null, 1);</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (numTests &lt; 1) numTests = 1;</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        else if (numTests &gt; 1)</span>
+            {
+<span class="nc" id="L88">            String m = state.parameters.getString(base.push(P_MERGE), null);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            if (m == null)</span>
+<span class="nc" id="L90">                state.output.warning(&quot;Merge method not provided to SimpleEvaluator.  Assuming 'mean'&quot;);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            else if (m.equals(V_MEAN))</span>
+<span class="nc" id="L92">                mergeForm = MERGE_MEAN;</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">            else if (m.equals(V_MEDIAN))</span>
+<span class="nc" id="L94">                mergeForm = MERGE_MEDIAN;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            else if (m.equals(V_BEST))</span>
+<span class="nc" id="L96">                mergeForm = MERGE_BEST;</span>
+            else
+<span class="nc" id="L98">                state.output.fatal(&quot;Bad merge method: &quot; + m, base.push(P_NUM_TESTS), null);</span>
+            }
+                
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (!state.parameters.exists(base.push(P_CHUNK_SIZE), null))</span>
+            {
+<span class="fc" id="L103">            chunkSize = C_AUTO;</span>
+            }
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        else if (state.parameters.getString(base.push(P_CHUNK_SIZE), null).equalsIgnoreCase(V_AUTO))</span>
+            {
+<span class="nc" id="L107">            chunkSize = C_AUTO;</span>
+            }
+        else
+            {
+<span class="nc" id="L111">            chunkSize = (state.parameters.getInt(base.push(P_CHUNK_SIZE), null, 1));</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            if (chunkSize == 0)  // uh oh</span>
+<span class="nc" id="L113">                state.output.fatal(&quot;Chunk Size must be either an integer &gt;= 1 or 'auto'&quot;, base.push(P_CHUNK_SIZE), null);</span>
+            }
+
+<span class="fc" id="L116">        } </span>
+
+<span class="fc" id="L118">    Population oldpop = null;</span>
+    
+    // replace the population with one that has some N copies of the original individuals
+    void expand(EvolutionState state)
+        {
+<span class="nc" id="L123">        Population pop = (Population)(state.population.emptyClone());</span>
+        
+        // populate with clones
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        for(int i = 0;i&lt;pop.subpops.size();++i)</span>
+            {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            for(int j = 0;j&lt;state.population.subpops.get(i).individuals.size();++j)</span>
+                {
+<span class="nc bnc" id="L130" title="All 2 branches missed.">                for(int k=0;k&lt;numTests;++k)</span>
+                    {
+<span class="nc" id="L132">                    pop.subpops.get(i).individuals.add((Individual) state.population.subpops.get(i).individuals.get(j).clone());</span>
+                    }
+                }
+            }
+        
+        // swap
+<span class="nc" id="L138">        oldpop = state.population;</span>
+<span class="nc" id="L139">        state.population = pop;</span>
+<span class="nc" id="L140">        }</span>
+    
+
+    // Take the N copies of the original individuals and fold their fitnesses back into the original
+    // individuals, replacing them with the original individuals in the process.  See expand(...)
+    void contract(EvolutionState state)
+        {
+        // swap back
+<span class="nc" id="L148">        Population pop = state.population;</span>
+<span class="nc" id="L149">        state.population = oldpop;</span>
+
+        // merge fitnesses again
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        for(int i = 0; i &lt; pop.subpops.size(); i++)</span>
+            {
+<span class="nc" id="L154">            Fitness[] fits = new Fitness[numTests];</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">            for(int j = 0; j &lt; state.population.subpops.get(i).individuals.size(); j++)</span>
+                {
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                for (int k=0; k &lt; numTests; k++)</span>
+                    {
+<span class="nc" id="L159">                    fits[k] = pop.subpops.get(i).individuals.get(numTests * j + k).fitness;</span>
+                    }
+
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                if (mergeForm == MERGE_MEAN)</span>
+                    {
+<span class="nc" id="L164">                    state.population.subpops.get(i).individuals.get(j).fitness.setToMeanOf(state, fits);</span>
+                    }
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                else if (mergeForm == MERGE_MEDIAN)</span>
+                    {
+<span class="nc" id="L168">                    state.population.subpops.get(i).individuals.get(j).fitness.setToMedianOf(state, fits);</span>
+                    }
+                else  // MERGE_BEST
+                    {
+<span class="nc" id="L172">                    state.population.subpops.get(i).individuals.get(j).fitness.setToBestOf(state, fits);</span>
+                    }
+
+<span class="nc" id="L175">                state.population.subpops.get(i).individuals.get(j).evaluated = true;</span>
+                }
+            }
+<span class="nc" id="L178">        }</span>
+        
+    /** A simple evaluator that doesn't do any coevolutionary
+        evaluation.  Basically it applies evaluation pipelines,
+        one per thread, to various subchunks of a new population. */
+    public void evaluatePopulation(final EvolutionState state)
+        {
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">        if (numTests &gt; 1)</span>
+<span class="nc" id="L186">            expand(state);</span>
+            
+        // reset counters.  Only used in multithreading
+<span class="fc" id="L189">        individualCounter = 0;</span>
+<span class="fc" id="L190">        subPopCounter = 0;</span>
+
+        // start up if single-threaded?
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if (state.evalthreads == 1)</span>
+            {
+<span class="fc" id="L195">            int[] numinds = new int[state.population.subpops.size()];</span>
+<span class="fc" id="L196">            int[] from = new int[numinds.length];</span>
+                        
+<span class="fc bfc" id="L198" title="All 2 branches covered.">            for(int i = 0; i &lt; numinds.length; i++)</span>
+                {
+<span class="fc" id="L200">                numinds[i] =  state.population.subpops.get(i).individuals.size();</span>
+<span class="fc" id="L201">                from[i] = 0;</span>
+                }
+                                
+<span class="fc" id="L204">            Problem prob = null;</span>
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">            if (cloneProblem)</span>
+<span class="fc" id="L206">                prob = (Problem)(p_problem.clone());</span>
+            else 
+<span class="nc" id="L208">                prob = (Problem)(p_problem);  // just use the prototype</span>
+<span class="fc" id="L209">            evalPopChunk(state, numinds, from, 0, prob);</span>
+<span class="fc" id="L210">            }</span>
+        else
+            {
+<span class="nc" id="L213">            ThreadPool.Worker[] threads = new ThreadPool.Worker[state.evalthreads];</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            for(int i = 0; i &lt; threads.length; i++)</span>
+                {
+<span class="nc" id="L216">                SimpleEvaluatorThread run = new SimpleEvaluatorThread();</span>
+<span class="nc" id="L217">                run.threadnum = i;</span>
+<span class="nc" id="L218">                run.state = state;</span>
+<span class="nc" id="L219">                run.prob = (Problem)p_problem.clone();</span>
+<span class="nc" id="L220">                threads[i] = pool.start(run, &quot;ECJ Evaluation Thread &quot; + i);</span>
+                }
+                        
+            // join
+<span class="nc" id="L224">            pool.joinAll();</span>
+            }
+
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">        if (numTests &gt; 1)</span>
+<span class="nc" id="L228">            contract(state);</span>
+<span class="fc" id="L229">        }</span>
+
+    /** The SimpleEvaluator determines that a run is complete by asking
+        each individual in each population if he's optimal; if he 
+        finds an individual somewhere that's optimal,
+        he signals that the run is complete. */
+    public String runComplete(final EvolutionState state)
+        {
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        for(int x = 0; x&lt; state.population.subpops.size(); x++)</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">            for(int y = 0; y&lt; state.population.subpops.get(x).individuals.size(); y++)</span>
+<span class="fc" id="L239">                if (state.population.subpops.get(x).</span>
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">                    individuals.get(y).fitness.isIdealFitness())</span>
+<span class="nc" id="L241">                    return &quot;Individual &quot; + y + &quot; of subpopulation &quot; + x + &quot; has an ideal fitness.&quot; ;</span>
+        
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if (runComplete != null) return runComplete;</span>
+<span class="fc" id="L244">        else return null;</span>
+        }
+
+
+
+
+    /** A private helper function for evaluatePopulation which evaluates a chunk
+        of individuals in a subpopulation for a given thread.
+        Although this method is declared
+        protected, you should not call it. */
+
+    protected void evalPopChunk(EvolutionState state, int[] numinds, int[] from, int threadnum, Problem p)
+        {
+<span class="fc" id="L257">        ((ec.Problem)p).prepareToEvaluate(state,threadnum);</span>
+
+<span class="pc bpc" id="L259" title="3 of 4 branches missed.">        if (!((p instanceof SimpleProblemForm) || (p instanceof GroupedProblemForm)))</span>
+<span class="nc" id="L260">            state.output.fatal(String.format(&quot;%s used, but the Problem must be of either %s or %s&quot;, this.getClass().getSimpleName(), SimpleProblemForm.class.getSimpleName(), GroupedProblemForm.class.getSimpleName()));</span>
+        
+<span class="fc" id="L262">        ArrayList&lt;Subpopulation&gt; subpops = state.population.subpops;</span>
+<span class="fc" id="L263">        int len = subpops.size();</span>
+        
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        for(int pop=0;pop&lt;len;pop++)</span>
+            {
+            // Get the chunk of individuals we're meant to evaluate
+<span class="fc" id="L268">            int fp = from[pop];</span>
+<span class="fc" id="L269">            int upperbound = fp+numinds[pop];</span>
+<span class="fc" id="L270">            ArrayList&lt;Individual&gt; inds = subpops.get(pop).individuals;</span>
+<span class="fc" id="L271">            final Individual[] chunk = new Individual[numinds[pop]];</span>
+<span class="fc" id="L272">            int i = 0;</span>
+<span class="fc bfc" id="L273" title="All 2 branches covered.">            for (int x=fp; x &lt; upperbound; x++)</span>
+<span class="fc" id="L274">                chunk[i++] = inds.get(x);</span>
+
+            // start evaluatin'!
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">            if (p instanceof GEProblem)			// need to check the subproblem</span>
+            	{
+<span class="nc" id="L279">            	Problem subproblem = (((GEProblem)p).problem);</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">             	if (subproblem instanceof GroupedProblemForm)  // Evaluate the chunk all at once</span>
+           	 		{
+<span class="nc" id="L282">                	((GroupedProblemForm)p).evaluate(state, chunk, null, false, null, threadnum);</span>
+            		}
+            	else // Evaluate each individual in the chunk sequentially
+            		{
+<span class="nc bnc" id="L286" title="All 2 branches missed.">                	for (Individual ind : chunk)</span>
+<span class="nc" id="L287">                	    ((SimpleProblemForm)p).evaluate(state, ind, pop, threadnum);</span>
+            		}
+<span class="nc" id="L289">            	} </span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">            else if (p instanceof GroupedProblemForm)  // Evaluate the chunk all at once</span>
+            	{
+<span class="nc" id="L292">                ((GroupedProblemForm)p).evaluate(state, chunk, null, false, null, threadnum);</span>
+            	}
+            else // Evaluate each individual in the chunk sequentially
+            	{
+<span class="fc bfc" id="L296" title="All 2 branches covered.">                for (Individual ind : chunk)</span>
+<span class="fc" id="L297">                    ((SimpleProblemForm)p).evaluate(state, ind, pop, threadnum);</span>
+            	}
+<span class="fc" id="L299">            state.incrementEvaluations(upperbound - fp);</span>
+            }
+                        
+<span class="fc" id="L302">        ((ec.Problem)p).finishEvaluating(state,threadnum);</span>
+<span class="fc" id="L303">        }</span>
+
+
+    // computes the chunk size if 'auto' is set.  This may be different depending on the subpopulation,
+    // which is backward-compatible with previous ECJ approaches.
+    int computeChunkSizeForSubpopulation(EvolutionState state, int subpop, int threadnum)
+        {
+<span class="nc" id="L310">        int numThreads = state.evalthreads;</span>
+                
+        // we will have some extra individuals.  We distribute these among the early subpopulations
+<span class="nc" id="L313">        int individualsPerThread = state.population.subpops.get(subpop).individuals.size() / numThreads;  // integer division</span>
+<span class="nc" id="L314">        int slop = state.population.subpops.get(subpop).individuals.size() - numThreads * individualsPerThread;</span>
+                
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        if (threadnum &gt;= slop) // beyond the slop</span>
+<span class="nc" id="L317">            return individualsPerThread;</span>
+<span class="nc" id="L318">        else return individualsPerThread + 1;</span>
+        }
+
+
+
+    /** A helper class for implementing multithreaded evaluation */
+<span class="nc" id="L324">    class SimpleEvaluatorThread implements Runnable</span>
+        {
+        public int threadnum;
+        public EvolutionState state;
+<span class="nc" id="L328">        public Problem prob = null;</span>
+        
+        public void run() 
+            {
+<span class="nc" id="L332">            ArrayList&lt;Subpopulation&gt; subpops = state.population.subpops;</span>
+
+<span class="nc" id="L334">            int[] numinds = new int[subpops.size()];</span>
+<span class="nc" id="L335">            int[] from = new int[subpops.size()];</span>
+
+<span class="nc" id="L337">            int count = 1;</span>
+<span class="nc" id="L338">            int start = 0;</span>
+<span class="nc" id="L339">            int subpop = 0;</span>
+
+            while (true)
+                {
+                // We need to grab the information about the next chunk we're responsible for.  This stays longer
+                // in the lock than I'd like :-(
+<span class="nc" id="L345">                synchronized(lock)</span>
+                    {
+                    // has everyone done all the jobs?
+<span class="nc bnc" id="L348" title="All 2 branches missed.">                    if (subPopCounter &gt;= subpops.size()) // all done</span>
+<span class="nc" id="L349">                        return;</span>
+                                        
+                    // has everyone finished the jobs for this subpopulation?
+<span class="nc bnc" id="L352" title="All 2 branches missed.">                    if (individualCounter &gt;= subpops.get(subPopCounter).individuals.size())  // try again, jump to next subpop</span>
+                        {
+<span class="nc" id="L354">                        individualCounter = 0; </span>
+<span class="nc" id="L355">                        subPopCounter++;</span>
+                                        
+                        // has everyone done all the jobs?  Check again.
+<span class="nc bnc" id="L358" title="All 2 branches missed.">                        if (subPopCounter &gt;= subpops.size()) // all done</span>
+<span class="nc" id="L359">                            return;</span>
+                        }
+
+<span class="nc" id="L362">                    start = individualCounter;</span>
+<span class="nc" id="L363">                    subpop = subPopCounter;</span>
+<span class="nc" id="L364">                    count = chunkSize;</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">                    if (count == C_AUTO)  // compute automatically for subpopulations</span>
+<span class="nc" id="L366">                        count = computeChunkSizeForSubpopulation(state, subpop, threadnum);</span>
+                    
+<span class="nc" id="L368">                    individualCounter += count;  // it can be way more than we'll actually do, that's fine                    </span>
+<span class="nc" id="L369">                    }</span>
+                
+                // Modify the true count
+<span class="nc bnc" id="L372" title="All 2 branches missed.">                if (count &gt;= subpops.get(subpop).individuals.size() - start)</span>
+<span class="nc" id="L373">                    count = subpops.get(subpop).individuals.size() - start;</span>
+
+                // Load into arrays to reuse evalPopChunk
+<span class="nc bnc" id="L376" title="All 2 branches missed.">                for(int i = 0; i &lt; from.length; i++)</span>
+<span class="nc" id="L377">                    numinds[i] = 0;</span>
+                        
+<span class="nc" id="L379">                numinds[subpop] = count;</span>
+<span class="nc" id="L380">                from[subpop] = start;</span>
+<span class="nc" id="L381">                evalPopChunk(state, numinds, from, threadnum, prob);</span>
+                }
+            }
+        }
+
+
+    }
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

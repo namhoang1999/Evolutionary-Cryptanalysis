@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Helper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.gaevolve.lc</a> &gt; <span class="el_source">Helper.java</span></div><h1>Helper.java</h1><pre class="source lang-java linenums">package ec.app.gaevolve.lc;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Random;
+import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
+
+<span class="nc" id="L9">public class Helper {</span>
+<span class="nc" id="L10">	public static int coverCount = 0;</span>
+
+	/**
+	 * Generate random round keys
+	 * @param round: number of rounds
+	 * @return an array of round keys
+	 */
+	public static int[] randomKeys(int round) {
+		// Using random library is not secure at all!
+<span class="nc" id="L19">		Random r = new Random();</span>
+		
+<span class="nc" id="L21">		int[] keys = new int[round];</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">		for (int i = 0; i &lt; keys.length; i++) {</span>
+<span class="nc" id="L23">			keys[i] = r.nextInt(65535);</span>
+		}
+		
+<span class="nc" id="L26">		return keys;</span>
+	}
+
+	/**
+	 * Print a number in a nice binary or hex format
+	 * @param n: Number to print
+	 * @param base: the base of the format (2-binary, 16-hex)
+	 */
+	public static String intf(int n, int base) {
+<span class="nc" id="L35">		String a = &quot;&quot;;</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">		if (base == 16) </span>
+<span class="nc" id="L37">			a = String.format(&quot;%4s&quot;, Integer.toHexString(n)).replace(&quot; &quot;,&quot;0&quot;);</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">		else if (base == 2) </span>
+<span class="nc" id="L39">			a = String.format(&quot;%4s.%4s.%4s.%4s&quot;, Integer.toBinaryString((n&amp; 0xf000)&gt;&gt;12), </span>
+<span class="nc" id="L40">				Integer.toBinaryString((n&amp; 0x0f00)&gt;&gt;8), </span>
+<span class="nc" id="L41">				Integer.toBinaryString((n&amp; 0x00f0)&gt;&gt;4), </span>
+<span class="nc" id="L42">				Integer.toBinaryString(n&amp; 0x000f)).replace(&quot; &quot;,&quot;0&quot;);</span>
+<span class="nc" id="L43">		return a;</span>
+	}
+	
+	/**
+	 * Return the i-th bit of the binary n 
+	 * @param n: Input number
+	 * @param i: index of the bit to extract (0 is the most right)
+	 * @return i-th bit of n
+	 */
+	public static int getBit(int n, int i) {
+<span class="nc" id="L53">        return (n &gt;&gt; i) &amp; 1;</span>
+    }
+	
+	/**
+	 * Set bit of a binary
+	 * @param n: Input number
+	 * @param i: Index of the bit to set (0 is the most right)
+	 * @param v: Value of the bit to set
+	 * @return New binary with i-th bit set
+	 */
+	public static int setBit(int n, int i, int v) {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		if (v == 1) return n |= (1 &lt;&lt; i);</span>
+<span class="nc" id="L65">		else		return n &amp;= ~(1 &lt;&lt; i);</span>
+	}
+
+	/**
+     * Calculate set bits from a binary (e.g. bitSum(0101) == 2)
+     * @param x binary input
+     * @return total number of set bits in the binary
+     */
+    static int bitSum(int x) {
+<span class="nc" id="L74">        int count = 0;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        for (int val = x; val &gt; 0; count++) {</span>
+<span class="nc" id="L76">            val = val &amp; (val - 1); </span>
+        }
+<span class="nc" id="L78">        return count;</span>
+    }
+
+	public static int generateMask(int n, int i, int j, int k, int l) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (n == 0b0000)      return 0;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        else if (n == 0b0001) return i;</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        else if (n == 0b0010) return i &lt;&lt; 4;</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        else if (n == 0b0011) return i &lt;&lt; 4 ^ j; </span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        else if (n == 0b0100) return i &lt;&lt; 8;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        else if (n == 0b0101) return i &lt;&lt; 8 ^ j;</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        else if (n == 0b0110) return i &lt;&lt; 8 ^ j &lt;&lt; 4;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        else if (n == 0b0111) return i &lt;&lt; 8 ^ j &lt;&lt; 4 ^ k;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        else if (n == 0b1000) return i &lt;&lt; 12;</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        else if (n == 0b1001) return i &lt;&lt; 12 ^ j;</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        else if (n == 0b1010) return i &lt;&lt; 12 ^ j &lt;&lt; 4;</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        else if (n == 0b1011) return i &lt;&lt; 12 ^ j &lt;&lt; 4 ^ k;</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        else if (n == 0b1100) return i &lt;&lt; 12 ^ j &lt;&lt; 8;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        else if (n == 0b1101) return i &lt;&lt; 12 ^ j &lt;&lt; 8 ^ k;</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        else if (n == 0b1110) return i &lt;&lt; 12 ^ j &lt;&lt; 8 ^ k &lt;&lt; 4;</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        else if (n == 0b1111) return i &lt;&lt; 12 ^ j &lt;&lt; 8 ^ k &lt;&lt; 4 ^ l;</span>
+<span class="nc" id="L98">        return 0;</span>
+    }
+	
+	/**
+	 * Generate Differential Distribution table for Differential Cryptanalysis
+	 * @return Linear Approximation of the input S-Box
+	 */
+	public static double[][] generateLinearTable() {
+<span class="nc" id="L106">        double[][] approximation = new double[16][16];</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        for (int x = 0; x &lt; 16; x++) {</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            for (int y = 0; y &lt; 16; y++) {</span>
+<span class="nc" id="L109">                double count = 0;</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                for (int i = 0; i &lt; 16; i++) {</span>
+<span class="nc" id="L111">                    int a = i&amp;x ^ HeysCipher.sBox[i]&amp;y;</span>
+<span class="nc" id="L112">                    int f = 0;</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                    while (a &gt; 0) {</span>
+<span class="nc" id="L114">                        f ^= a &amp; 1;</span>
+<span class="nc" id="L115">                        a &gt;&gt;= 1;</span>
+                    }
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                    if (f != 0) count += 1;</span>
+                }
+<span class="nc" id="L119">                approximation[x][y] = Math.abs(count-8)/16;</span>
+            }
+        }
+<span class="nc" id="L122">        return approximation;</span>
+    }
+
+	/**
+	 * Generate Differential Distribution table for Differential Cryptanalysis
+	 * @return Linear Approximation of the input S-Box
+	 */
+	public static double[][] generateDifferentialTable() {
+<span class="nc" id="L130">        double[][] ddt = new double[16][16];</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        for (int x = 0; x &lt;= 0b1111; x++) {</span>
+<span class="nc" id="L132">            int y = HeysCipher.sBox[x];</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">			for (int x2 = 0; x2 &lt;= 0b1111; x2++) {</span>
+<span class="nc" id="L134">                int dx = x ^ x2;</span>
+				
+<span class="nc" id="L136">				int y2 = HeysCipher.sBox[x2];</span>
+<span class="nc" id="L137">				int dy = y ^ y2;</span>
+				
+<span class="nc" id="L139">				ddt[dx][dy]++;</span>
+            }
+        }
+<span class="nc" id="L142">        return ddt;</span>
+    }
+
+	/**
+	 * Write an array to a file
+	 * @param path: Path to file
+	 * @param data: Array to write
+	 */
+	public static void writeFile(String path, double[] arr) {
+		try {
+<span class="nc" id="L152">				FileWriter myWriter = new FileWriter(path,false);</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">				for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L154">					myWriter.write(arr[i] + &quot; &quot;);</span>
+				}
+			  
+<span class="nc" id="L157">		    	myWriter.close();</span>
+<span class="nc" id="L158">		    } catch (IOException e) {</span>
+<span class="nc" id="L159">		    	e.printStackTrace();</span>
+<span class="nc" id="L160">		    }</span>
+<span class="nc" id="L161">	}</span>
+
+	/**
+	 * Read plaintext-ciphertext from a file into an array
+	 * @param path: Path to file
+	 * @return AArray of plaintext-ciphertext pairs 
+	 */
+	public static double[] readFile(String path, int length) {
+<span class="nc" id="L169">		System.out.println(&quot;Reading from: &quot; + path);</span>
+<span class="nc" id="L170">		double[] arr = new double[length];</span>
+		try {
+<span class="nc" id="L172">			Scanner scanner = new Scanner(new File(path));</span>
+<span class="nc" id="L173">			String[] line = scanner.nextLine().split(&quot; &quot;);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">			for (int i = 0; i &lt; line.length; i++) {</span>
+<span class="nc" id="L175">				arr[i] = Double.parseDouble(line[i]);</span>
+			}
+<span class="nc" id="L177">			scanner.close();</span>
+<span class="nc" id="L178">		} catch (FileNotFoundException e) {</span>
+<span class="nc" id="L179">			e.printStackTrace();</span>
+<span class="nc" id="L180">		}</span>
+<span class="nc" id="L181">		return arr;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

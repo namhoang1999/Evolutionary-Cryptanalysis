@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Linear.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.gpevolve.lc</a> &gt; <span class="el_source">Linear.java</span></div><h1>Linear.java</h1><pre class="source lang-java linenums">package ec.app.gpevolve.lc;
+import ec.util.*;
+
+import java.util.Arrays;
+
+import ec.*;
+import ec.app.gpevolve.lc.cipher.SBoxPosition;
+import ec.gp.*;
+import ec.gp.koza.*;
+
+<span class="nc" id="L11">public class Linear extends GPProblem {</span>
+    private static final long serialVersionUID = 1;
+
+    public SBoxPosition a;
+    public int x,y;
+    public static int maxX,maxY;
+    public double best;
+
+    public static double[][] APPROXIMATION;
+    public double[] bias;
+    public int[] nullCount;
+
+    public void setup(final EvolutionState state, final Parameter base) {
+<span class="nc" id="L24">        super.setup(state, base);</span>
+        
+        // verify our input is the right class (or subclasses from it)
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (!(input instanceof LinearData))</span>
+<span class="nc" id="L28">            state.output.fatal(&quot;GPData class must subclass from &quot; + LinearData.class, base.push(P_DATA), null);</span>
+
+        // Generate Linear SBoxPosition Table
+<span class="nc" id="L31">        APPROXIMATION = Helper.generateLinearTable();</span>
+<span class="nc" id="L32">        int rounds = state.parameters.getInt(base.push(&quot;x&quot;),null,1);</span>
+
+        // setup default position 
+<span class="nc" id="L35">        a = new SBoxPosition(rounds);</span>
+<span class="nc" id="L36">        maxX = 4;</span>
+<span class="nc" id="L37">        maxY = rounds;</span>
+
+<span class="nc bnc" id="L39" title="All 4 branches missed.">        switch (rounds) {</span>
+            case 3: 
+<span class="nc" id="L41">                this.bias = Helper.readFile(&quot;C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/results/lc-3.txt&quot;,16*16*16); </span>
+<span class="nc" id="L42">                this.best = 0.0791015625; break;</span>
+            case 4: 
+<span class="nc" id="L44">                this.bias = Helper.readFile(&quot;C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/results/lc-4.txt&quot;,16*16*16*16); </span>
+<span class="nc" id="L45">                this.best = 0.019775390625; break;</span>
+            case 5: 
+<span class="nc" id="L47">                this.bias = Helper.readFile(&quot;C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/results/lc-5.txt&quot;,16*16*16*16*16); </span>
+<span class="nc" id="L48">                this.best = 0.007415771484375; break;</span>
+            default:
+<span class="nc" id="L50">                this.best = 1;</span>
+        }
+
+<span class="nc" id="L53">        nullCount = new int[bias.length];</span>
+<span class="nc" id="L54">    }</span>
+        
+    public void evaluate(final EvolutionState state, 
+        final Individual ind, 
+        final int subpopulation,
+        final int threadnum) {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if (!ind.evaluated) { // don't bother reevaluating </span>
+<span class="nc" id="L61">                LinearData input = (LinearData)(this.input);</span>
+                
+<span class="nc" id="L63">                double fitness = 0;</span>
+<span class="nc" id="L64">                int hits = 0;</span>
+<span class="nc" id="L65">                a.defaultSettings();</span>
+<span class="nc" id="L66">                x = 0;</span>
+<span class="nc" id="L67">                y = 0;</span>
+
+<span class="nc" id="L69">                ((GPIndividual)ind).trees[0].child.eval(</span>
+                    state,threadnum,input,stack,((GPIndividual)ind),this);
+
+                // No need to evaluate, we already pre-calculated everything!
+<span class="nc" id="L73">                int index = a.getIndex();</span>
+<span class="nc" id="L74">                fitness = bias[index];</span>
+
+                // display index as hits
+<span class="nc" id="L77">                hits = index;</span>
+<span class="nc" id="L78">                nullCount[index] = 1;</span>
+
+                // the fitness better be KozaFitness!
+<span class="nc" id="L81">                KozaFitness f = ((KozaFitness)ind.fitness);</span>
+<span class="nc" id="L82">                f.setStandardizedFitness(state, this.best - fitness);</span>
+<span class="nc" id="L83">                f.hits = hits;</span>
+<span class="nc" id="L84">                ind.evaluated = true;</span>
+            }
+<span class="nc" id="L86">        }</span>
+
+        public void describe(
+            final EvolutionState state, 
+            final Individual ind, 
+            final int subpopulation, 
+            final int threadnum, 
+            final int log) {
+<span class="nc" id="L94">                state.output.println(&quot;\n\nBest Individual's Map\n=====================&quot;, log);</span>
+                
+<span class="nc" id="L96">                a.defaultSettings();</span>
+<span class="nc" id="L97">                x = 0;</span>
+<span class="nc" id="L98">                y = 0;</span>
+
+<span class="nc" id="L100">                ((GPIndividual)ind).trees[0].child.eval(</span>
+                    state,threadnum,input,stack,((GPIndividual)ind),this);
+
+<span class="nc" id="L103">                state.output.println(&quot;Individual's Index: &quot; + a.getIndex(),log);</span>
+<span class="nc" id="L104">                state.output.println(&quot;Individual's Bias: &quot; + bias[a.getIndex()],log);</span>
+<span class="nc" id="L105">                state.output.println(&quot;input U: &quot; + a.getBestU(),log);</span>
+<span class="nc" id="L106">                state.output.println(&quot;input V: &quot; + a.getBestV(),log);</span>
+<span class="nc" id="L107">                state.output.println(&quot;SBox Positions: &quot; + Arrays.toString(a.getSBoxPosition()),log);</span>
+                
+<span class="nc" id="L109">                state.output.println(a.getVisualSBoxPosition(),log);</span>
+
+<span class="nc" id="L111">                int count = 0;</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">                for (int i = 0; i &lt; nullCount.length; i++) </span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                    if (nullCount[i] == 1) count++;</span>
+<span class="nc" id="L114">                System.out.println(&quot;Null count: &quot; + count);</span>
+<span class="nc" id="L115">                state.output.println(&quot;Null count: &quot; + count, log);</span>
+<span class="nc" id="L116">        }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

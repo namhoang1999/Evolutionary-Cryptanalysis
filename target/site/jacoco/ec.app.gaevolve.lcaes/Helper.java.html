@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Helper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.gaevolve.lcaes</a> &gt; <span class="el_source">Helper.java</span></div><h1>Helper.java</h1><pre class="source lang-java linenums">package ec.app.gaevolve.lcaes;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Random;
+import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
+
+<span class="nc" id="L9">public class Helper {</span>
+<span class="nc" id="L10">	public static int coverCount = 0;</span>
+	
+	/**
+	 * Generate random round keys
+	 * @param round: number of rounds
+	 * @return an array of round keys
+	 */
+	public static long[] randomKeys(int round,int seed) {
+		// Using random library is not secure at all!
+<span class="nc" id="L19">		Random r = new Random();</span>
+<span class="nc" id="L20">		r.setSeed(seed);</span>
+		
+<span class="nc" id="L22">		long[] keys = new long[round];</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">		for (int i = 0; i &lt; keys.length; i++) {</span>
+<span class="nc" id="L24">			keys[i] = r.nextLong();</span>
+		}
+		
+<span class="nc" id="L27">		return keys;</span>
+	}
+
+
+	public static String binaryPrint(long inputBlock, int mode) {
+<span class="nc bnc" id="L32" title="All 4 branches missed.">		switch(mode) {</span>
+<span class="nc" id="L33">			case 16: return String.format(&quot;%16s&quot;, Long.toBinaryString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L34">			case 32: return String.format(&quot;%32s&quot;, Long.toBinaryString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L35">			case 64: return String.format(&quot;%64s&quot;, Long.toBinaryString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L36">			default: return &quot;[PrettyPrint] mode parameter is not correctly defined!&quot;;</span>
+		}
+	}
+
+	
+	public static String binaryPrint(int inputBlock, int mode) {
+<span class="nc bnc" id="L42" title="All 5 branches missed.">		switch(mode) {</span>
+<span class="nc" id="L43">			case  8: return String.format( &quot;%8s&quot;, Integer.toBinaryString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L44">			case 16: return String.format(&quot;%16s&quot;, Integer.toBinaryString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L45">			case 32: return String.format(&quot;%32s&quot;, Integer.toBinaryString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L46">			case 64: return String.format(&quot;%64s&quot;, Integer.toBinaryString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L47">			default: return &quot;[PrettyPrint] mode parameter is not correctly defined!&quot;;</span>
+		}
+	}
+
+	public static String hexPrint(long inputBlock, int mode) {
+<span class="nc bnc" id="L52" title="All 5 branches missed.">		switch(mode) {</span>
+<span class="nc" id="L53">			case  2: return String.format( &quot;%2s&quot;, Long.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L54">			case  4: return String.format( &quot;%4s&quot;, Long.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L55">			case  8: return String.format( &quot;%8s&quot;, Long.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L56">			case 16: return String.format(&quot;%16s&quot;, Long.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L57">			default: return &quot;[PrettyPrint] mode parameter is not correctly defined!&quot;;</span>
+		}
+	}
+
+	
+	public static String hexPrint(int inputBlock, int mode) {
+<span class="nc bnc" id="L63" title="All 6 branches missed.">		switch(mode) {</span>
+<span class="nc" id="L64">			case  1: return String.format( &quot;%1s&quot;, Integer.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L65">			case  2: return String.format( &quot;%2s&quot;, Integer.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L66">			case  4: return String.format( &quot;%4s&quot;, Integer.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L67">			case  8: return String.format( &quot;%8s&quot;, Integer.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L68">			case 16: return String.format(&quot;%16s&quot;, Integer.toHexString(inputBlock)).replace(' ', '0');</span>
+<span class="nc" id="L69">			default: return &quot;[PrettyPrint] mode parameter is not correctly defined!&quot;;</span>
+		}
+	}
+	
+    public static int getBit(long n, int i) {
+<span class="nc" id="L74">        return (int)(Long.rotateRight(n,i) &amp; 1);</span>
+    }
+
+    public static long setBit(long n, int i) {
+<span class="nc" id="L78">        return n ^ Long.rotateLeft(1, i);</span>
+    }
+
+	/**
+     * Calculate set bits from a binary (e.g. bitSum(0101) == 2)
+     * @param x binary input
+     * @return total number of set bits in the binary
+     */
+    public static int bitSum(int x) {
+<span class="nc" id="L87">        int count = 0;</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        for (int val = x; val &gt; 0; count++) {</span>
+<span class="nc" id="L89">            val = val &amp; (val - 1); </span>
+        }
+<span class="nc" id="L91">        return count;</span>
+    }
+
+	/**
+	 * Write an array to a file
+	 * @param path: Path to file
+	 * @param data: Array to write
+	 */
+	public static void writeFile(String path, double[] arr) {
+		try {
+<span class="nc" id="L101">				FileWriter myWriter = new FileWriter(path,false);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">				for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L103">					myWriter.write(arr[i] + &quot; &quot;);</span>
+				}
+			  
+<span class="nc" id="L106">		    	myWriter.close();</span>
+<span class="nc" id="L107">		    } catch (IOException e) {</span>
+<span class="nc" id="L108">		    	e.printStackTrace();</span>
+<span class="nc" id="L109">		    }</span>
+<span class="nc" id="L110">	}</span>
+
+	/**
+	 * Read plaintext-ciphertext from a file into an array
+	 * @param path: Path to file
+	 * @return AArray of plaintext-ciphertext pairs 
+	 */
+	public static double[] readFile(String path, int length) {
+<span class="nc" id="L118">		double[] arr = new double[length];</span>
+		try {
+<span class="nc" id="L120">			Scanner scanner = new Scanner(new File(path));</span>
+<span class="nc" id="L121">			String[] line = scanner.nextLine().split(&quot; &quot;);</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">			for (int i = 0; i &lt; line.length; i++) {</span>
+<span class="nc" id="L123">				arr[i] = Double.parseDouble(line[i]);</span>
+			}
+<span class="nc" id="L125">			scanner.close();</span>
+<span class="nc" id="L126">		} catch (FileNotFoundException e) {</span>
+<span class="nc" id="L127">			e.printStackTrace();</span>
+<span class="nc" id="L128">		}</span>
+<span class="nc" id="L129">		return arr;</span>
+	}
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

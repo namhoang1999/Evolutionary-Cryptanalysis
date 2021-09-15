@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SBoxPosition.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.gaevolve.dcaes</a> &gt; <span class="el_source">SBoxPosition.java</span></div><h1>SBoxPosition.java</h1><pre class="source lang-java linenums">package ec.app.gaevolve.dcaes;
+
+public class SBoxPosition {
+    private int[] position, argMax;
+    private long bestU, bestV;
+    private int round;
+    private double[][] DDT,LAT;
+<span class="nc" id="L8">    private String outputBest = &quot;&quot;;</span>
+
+<span class="nc" id="L10">    public SBoxPosition(int r) {</span>
+<span class="nc" id="L11">        this.round  = r;</span>
+<span class="nc" id="L12">        this.defaultSettings();</span>
+<span class="nc" id="L13">        this.DDT = Cipher.generateLinearTable();</span>
+<span class="nc" id="L14">        this.DDT = Cipher.generateDifferentialTable();</span>
+<span class="nc" id="L15">        this.argMax = maxValueIndexes();</span>
+<span class="nc" id="L16">    }</span>
+
+    public int[] maxValueIndexes() {
+<span class="nc" id="L19">        int[] indexes = new int[DDT.length];</span>
+
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        for (int i = 0; i &lt; DDT.length; i++) { </span>
+<span class="nc" id="L22">            double best = 0;</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">            for (int j = 0; j &lt; DDT.length; j++) {</span>
+<span class="nc bnc" id="L24" title="All 2 branches missed.">                if (DDT[i][j] &gt; best) {</span>
+<span class="nc" id="L25">                    indexes[i] = j;</span>
+<span class="nc" id="L26">                    best = DDT[i][j];</span>
+                }
+            }
+        }
+<span class="nc" id="L30">        return indexes;</span>
+    }
+
+    private double lastRound(long U) {
+<span class="nc" id="L34">        double bias = 1;</span>
+<span class="nc" id="L35">        long V = 0;</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        for (int i = 0; i &lt; 64; i+=8) {</span>
+<span class="nc" id="L37">            int blockU = (int)(Long.rotateRight(U, i) &amp; 0xff);</span>
+<span class="nc" id="L38">            int blockV = this.argMax[blockU];</span>
+<span class="nc" id="L39">            bias *= DDT[blockU][blockV]/256;</span>
+<span class="nc" id="L40">            V ^=  Long.rotateLeft(blockV, i);</span>
+        }
+<span class="nc" id="L42">        this.bestV = V;</span>
+<span class="nc" id="L43">        return bias;</span>
+    }
+
+    public double calculateStatistic(long U, long V) {
+<span class="nc bnc" id="L47" title="All 4 branches missed.">        if ((U == 0) || (V == 0)) return 0;</span>
+<span class="nc" id="L48">        double bias = 1;</span>
+<span class="nc" id="L49">        int mask = (int)(Math.pow(2,8)-1);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        for (int i = 0; i &lt; 64; i += 8) {</span>
+<span class="nc" id="L51">            int blockU = (int)(Long.rotateRight(U, i) &amp; mask);</span>
+<span class="nc" id="L52">            int blockV = (int)(Long.rotateRight(V, i) &amp; mask);</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            if (blockU != 0) {</span>
+<span class="nc" id="L55">                bias *= DDT[blockU][blockV]/256;</span>
+            }
+        }
+<span class="nc" id="L58">        return bias;</span>
+    }
+
+    private double bestRoundApproximation(long U, int currPosition, int nextPosition) {
+        long V;
+<span class="nc" id="L63">        int n = (int)Math.pow(2,8);</span>
+<span class="nc" id="L64">        double curr, best = 0;</span>
+
+<span class="nc" id="L66">        int compareMask = nextPosition;</span>
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (Helper.bitSum(currPosition) == 1) {</span>
+<span class="nc" id="L69">            this.bestV = generateMask(currPosition, nextPosition, 0, 0, 0, 0, 0, 0, 0);</span>
+<span class="nc" id="L70">            best = calculateStatistic(U,this.bestV);   </span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        } else if (Helper.bitSum(currPosition) == 2) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            for (int i = 1; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">                for (int j = 1; j &lt; n; j++) {</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">                    if ((i | j) == compareMask) {</span>
+<span class="nc" id="L75">                        V = generateMask(currPosition, i, j, 0, 0, 0, 0, 0, 0);</span>
+<span class="nc" id="L76">                        curr = calculateStatistic(U,V);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">                        if (curr &gt; best) {</span>
+<span class="nc" id="L78">                            best = curr;</span>
+<span class="nc" id="L79">                            this.bestV = V;</span>
+                        }
+                    }
+                }
+            }
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        } else if (Helper.bitSum(currPosition) == 3) {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            for (int i = 1; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                for (int j = 1; j &lt; n; j++) {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                    for (int k = 1; k &lt; n; k++) {</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                        if ((i | j | k) == compareMask) {</span>
+<span class="nc" id="L89">                            V = generateMask(currPosition, i, j, k, 0, 0, 0, 0, 0);</span>
+<span class="nc" id="L90">                            curr = calculateStatistic(U,V);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                            if (curr &gt; best) {</span>
+<span class="nc" id="L92">                                best = curr;</span>
+<span class="nc" id="L93">                                this.bestV = V;</span>
+                            }
+                        }
+                    }       
+                }
+            }
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        } else if (Helper.bitSum(currPosition) == 4) {</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            for (int i = 1; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                for (int j = 1; j &lt; n; j++) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                    for (int k = 1; k &lt; n; k++) {</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                        for (int l = 1; l &lt; n; l++) {</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                            if ((i | j | k | l) == compareMask) {</span>
+<span class="nc" id="L105">                                V = generateMask(currPosition, i, j, k, l, 0, 0, 0, 0);</span>
+<span class="nc" id="L106">                                curr = calculateStatistic(U,V);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                                if (curr &gt; best) {</span>
+<span class="nc" id="L108">                                    best = curr;</span>
+<span class="nc" id="L109">                                    this.bestV = V;</span>
+                                }
+                            }
+                        }           
+                    }       
+                }
+            }
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        } else if (Helper.bitSum(currPosition) == 5) {</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            for (int a = 1; a &lt; n; a++) {</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">                for (int b = 1; b &lt; n; b++) {</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">                    for (int c = 1; c &lt; n; c++) {</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                        for (int d = 1; d &lt; n; d++) {</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                            for (int e = 1; e &lt; n; e++) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                                if ((a | b | c | d | e) == compareMask) {</span>
+<span class="nc" id="L123">                                    V = generateMask(currPosition, a, b, c, d, e, 0, 0, 0);</span>
+<span class="nc" id="L124">                                    curr = calculateStatistic(U,V);</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                                    if (curr &gt; best) {</span>
+<span class="nc" id="L126">                                        best = curr;</span>
+<span class="nc" id="L127">                                        this.bestV = V;</span>
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }    
+            }
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        } else if (Helper.bitSum(currPosition) == 6) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            for (int a = 1; a &lt; n; a++) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                for (int b = 1; b &lt; n; b++) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                    for (int c = 1; c &lt; n; c++) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                        for (int d = 1; d &lt; n; d++) {</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                            for (int e = 1; e &lt; n; e++) {</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                                for (int f = 1; f &lt; n; f++) {</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">                                    if ((a | b | c | d | e | f) == compareMask) {</span>
+<span class="nc" id="L143">                                        V = generateMask(currPosition, a, b, c, d, e, f, 0, 0);</span>
+<span class="nc" id="L144">                                        curr = calculateStatistic(U,V);</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">                                        if (curr &gt; best) {</span>
+<span class="nc" id="L146">                                            best = curr;</span>
+<span class="nc" id="L147">                                            this.bestV = V;</span>
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }    
+            }
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        } else if (Helper.bitSum(currPosition) == 7) {</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            for (int a = 1; a &lt; n; a++) {</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">                for (int b = 1; b &lt; n; b++) {</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">                    for (int c = 1; c &lt; n; c++) {</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">                        for (int d = 1; d &lt; n; d++) {</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">                            for (int e = 1; e &lt; n; e++) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                                for (int f = 1; f &lt; n; f++) {</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                                    for (int g = 1; g &lt; n; g++) {</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                                        if ((a | b | c | d | e | f | g) == compareMask) {</span>
+<span class="nc" id="L165">                                            V = generateMask(currPosition, a, b, c, d, e, f, g, 0);</span>
+<span class="nc" id="L166">                                            curr = calculateStatistic(U,V);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">                                            if (curr &gt; best) {</span>
+<span class="nc" id="L168">                                                best = curr;</span>
+<span class="nc" id="L169">                                                this.bestV = V;</span>
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }    
+            }
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        } else if (Helper.bitSum(currPosition) == 8) {</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">            for (int a = 1; a &lt; n; a++) {</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">                for (int b = 1; b &lt; n; b++) {</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                    for (int c = 1; c &lt; n; c++) {</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">                        for (int d = 1; d &lt; n; d++) {</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                            for (int e = 1; e &lt; n; e++) {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                                for (int f = 1; f &lt; n; f++) {</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">                                    for (int g = 1; g &lt; n; g++) {</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">                                        for (int h = 1; h &lt; n; h++) {</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                                            if ((a | b | c | d | e | f | g | h) == compareMask) {</span>
+<span class="nc" id="L189">                                                V = generateMask(currPosition, a, b, c, d, e, f, g, h);</span>
+<span class="nc" id="L190">                                                curr = calculateStatistic(U,V);</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">                                                if (curr &gt; best) {</span>
+<span class="nc" id="L192">                                                    best = curr;</span>
+<span class="nc" id="L193">                                                    this.bestV = V;</span>
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }    
+            }
+        }
+<span class="nc" id="L205">        return best;</span>
+    }
+
+    public double getBestBias() {
+<span class="nc" id="L209">        int n = (int)Math.pow(2,8);</span>
+<span class="nc" id="L210">        double curr, best = 0;</span>
+<span class="nc" id="L211">        int currPosition = 0;</span>
+        long U;
+
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        for (int round = 0; round &lt; this.position.length; round++) </span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">            if (this.position[round] == 0) return 0;</span>
+        
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        for (int round = 0; round &lt; this.position.length; round++) {</span>
+<span class="nc" id="L218">            currPosition = this.position[round];</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            if (round == 0) {</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">                if (Helper.bitSum(currPosition) == 1) {</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                    for (int i = 1; i &lt; n; i++) {</span>
+<span class="nc" id="L222">                        U = generateMask(currPosition, i, 0, 0, 0, 0, 0, 0, 0);</span>
+<span class="nc" id="L223">                        curr = bestRoundApproximation(U,currPosition,this.position[round+1]);</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">                        if (curr &gt; best) {</span>
+<span class="nc" id="L225">                            best = curr;</span>
+<span class="nc" id="L226">                            this.bestU = U;</span>
+                        }
+                    }
+<span class="nc bnc" id="L229" title="All 2 branches missed.">                } else if (Helper.bitSum(currPosition) == 2) {</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">                    for (int i = 1; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">                        for (int j = 1; j &lt; n; j++) {</span>
+<span class="nc" id="L232">                            U = generateMask(currPosition, i, j, 0, 0, 0, 0, 0, 0);</span>
+<span class="nc" id="L233">                            curr = bestRoundApproximation(U,currPosition,this.position[round+1]);</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">                            if (curr &gt; best) {</span>
+<span class="nc" id="L235">                                best = curr;</span>
+<span class="nc" id="L236">                                this.bestU = U;</span>
+                            }   
+                        }
+                    }
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                } else if (Helper.bitSum(currPosition) == 3) {</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                    for (int i = 1; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">                        for (int j = 1; j &lt; n; j++) {</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">                            for (int k = 1; k &lt; n; k++) {</span>
+<span class="nc" id="L244">                                U = generateMask(currPosition, i, j, k, 0, 0, 0, 0, 0);</span>
+<span class="nc" id="L245">                                curr = bestRoundApproximation(U,currPosition,this.position[round+1]);</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">                                if (curr &gt; best) {</span>
+<span class="nc" id="L247">                                    best = curr;</span>
+<span class="nc" id="L248">                                    this.bestU = U;</span>
+                                }   
+                            }
+                        }
+                    }
+<span class="nc bnc" id="L253" title="All 2 branches missed.">                } else if (Helper.bitSum(currPosition) == 4) {</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">                    for (int i = 1; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">                        for (int j = 1; j &lt; n; j++) {</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                            for (int k = 1; k &lt; n; k++) {</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                                for (int l = 1; l &lt; n; l++) {</span>
+<span class="nc" id="L258">                                    U = generateMask(currPosition, i, j, k, l, 0, 0, 0, 0);</span>
+<span class="nc" id="L259">                                    curr = bestRoundApproximation(U,currPosition,this.position[round+1]);</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                                    if (curr &gt; best) {</span>
+<span class="nc" id="L261">                                        best = curr;</span>
+<span class="nc" id="L262">                                        this.bestU = U;</span>
+                                    }   
+                                }
+                            }
+                        }
+                    }
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                } else if (Helper.bitSum(currPosition) == 5) {</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">                    for (int a = 1; a &lt; n; a++) {</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                        for (int b = 1; b &lt; n; b++) {</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">                            for (int c = 1; c &lt; n; c++) {</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                                for (int d = 1; d &lt; n; d++) {</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">                                    for (int e = 1; e &lt; n; e++) {</span>
+<span class="nc" id="L274">                                        U = generateMask(currPosition, a, b, c, d, e, 0, 0, 0);</span>
+<span class="nc" id="L275">                                        curr = bestRoundApproximation(U,currPosition,this.position[round+1]);</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">                                        if (curr &gt; best) {</span>
+<span class="nc" id="L277">                                            best = curr;</span>
+<span class="nc" id="L278">                                            this.bestU = U;</span>
+                                        }  
+                                    }
+                                }
+                            }
+                        }    
+                    }
+<span class="nc bnc" id="L285" title="All 2 branches missed.">                } else if (Helper.bitSum(currPosition) == 6) {</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">                    for (int a = 1; a &lt; n; a++) {</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">                        for (int b = 1; b &lt; n; b++) {</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">                            for (int c = 1; c &lt; n; c++) {</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">                                for (int d = 1; d &lt; n; d++) {</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">                                    for (int e = 1; e &lt; n; e++) {</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                                        for (int f = 1; f &lt; n; f++) {</span>
+<span class="nc" id="L292">                                            U = generateMask(currPosition, a, b, c, d, e, f, 0, 0);</span>
+<span class="nc" id="L293">                                            curr = bestRoundApproximation(U,currPosition,this.position[round+1]);</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">                                            if (curr &gt; best) {</span>
+<span class="nc" id="L295">                                                best = curr;</span>
+<span class="nc" id="L296">                                                this.bestU = U;</span>
+                                            }  
+                                        }
+                                    }
+                                }
+                            }
+                        }    
+                    }
+<span class="nc bnc" id="L304" title="All 2 branches missed.">                } else if (Helper.bitSum(currPosition) == 7) {</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">                    for (int a = 1; a &lt; n; a++) {</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">                        for (int b = 1; b &lt; n; b++) {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">                            for (int c = 1; c &lt; n; c++) {</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">                                for (int d = 1; d &lt; n; d++) {</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">                                    for (int e = 1; e &lt; n; e++) {</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">                                        for (int f = 1; f &lt; n; f++) {</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">                                            for (int g = 1; g &lt; n; g++) {</span>
+<span class="nc" id="L312">                                                U = generateMask(currPosition, a, b, c, d, e, f, g, 0);</span>
+<span class="nc" id="L313">                                                curr = bestRoundApproximation(U,currPosition,this.position[round+1]);</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">                                                if (curr &gt; best) {</span>
+<span class="nc" id="L315">                                                    best = curr;</span>
+<span class="nc" id="L316">                                                    this.bestU = U;</span>
+                                                }   
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }    
+                    }
+<span class="nc bnc" id="L325" title="All 2 branches missed.">                } else if (Helper.bitSum(currPosition) == 8) {</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">                    for (int a = 1; a &lt; n; a++) {</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">                        for (int b = 1; b &lt; n; b++) {</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                            for (int c = 1; c &lt; n; c++) {</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">                                for (int d = 1; d &lt; n; d++) {</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">                                    for (int e = 1; e &lt; n; e++) {</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">                                        for (int f = 1; f &lt; n; f++) {</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">                                            for (int g = 1; g &lt; n; g++) {</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">                                                for (int h = 1; h &lt;= n; h++) {</span>
+<span class="nc" id="L334">                                                    U = generateMask(currPosition, a, b, c, d, e, f, g, h);</span>
+<span class="nc" id="L335">                                                    curr = bestRoundApproximation(U,currPosition,this.position[round+1]);</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">                                                    if (curr &gt; best) {</span>
+<span class="nc" id="L337">                                                        best = curr;</span>
+<span class="nc" id="L338">                                                        this.bestU = U;</span>
+                                                    }  
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }    
+                    }
+                }
+<span class="nc" id="L349">                outputBest += &quot;U_&quot; + round + &quot;: &quot; + Helper.hexPrint(this.bestU,16) + &quot;\n&quot;; </span>
+<span class="nc" id="L350">                outputBest += &quot;V_&quot; + round + &quot;: &quot; + Helper.hexPrint(this.bestV,16) + &quot;\n&quot;;</span>
+            } else {
+<span class="nc" id="L352">                U = Cipher.pBoxEncrypt(this.bestV);</span>
+     
+<span class="nc bnc" id="L354" title="All 2 branches missed.">                if (round &lt; this.position.length - 1) best *= bestRoundApproximation(U,currPosition,position[round+1]);</span>
+<span class="nc" id="L355">                else                                  best *= lastRound(U);</span>
+                
+<span class="nc" id="L357">                outputBest += &quot;U_&quot; + round + &quot;: &quot; + Helper.hexPrint(U,16) + &quot;\n&quot;; </span>
+<span class="nc" id="L358">                outputBest += &quot;V_&quot; + round + &quot;: &quot; + Helper.hexPrint(this.bestV,16) + &quot;\n&quot;;</span>
+            }
+<span class="nc bnc" id="L360" title="All 2 branches missed.">            if (best == 0) return 0; </span>
+        }
+
+<span class="nc" id="L363">        return best;</span>
+    }
+
+    public long generateMask(int n, int a, int b, int c, int d, int e, int f, int g, int h) {
+<span class="nc" id="L367">        int[] arr = new int[]{a,b,c,d,e,f,g,h};</span>
+<span class="nc" id="L368">        int next = 0;</span>
+<span class="nc" id="L369">        long out = 0;</span>
+<span class="nc bnc" id="L370" title="All 2 branches missed.">        for (int i = 7; i &gt;= 0; i--) {</span>
+<span class="nc" id="L371">            int bit = Helper.getBit(n, i);</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">            if (bit == 1) {</span>
+<span class="nc" id="L373">                out ^= Long.rotateLeft(arr[next],8*i);</span>
+<span class="nc" id="L374">                next++;</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">                if (arr[next] == 0) return out;</span>
+            } 
+        }
+<span class="nc" id="L378">        return out;</span>
+    }
+
+    /**
+     * Set the default settings
+     */
+    public void defaultSettings() {
+        //this.position = new int[]{0b0010,0b0010,0b0010,0b1110};
+<span class="nc" id="L386">        this.position = new int[this.round];</span>
+<span class="nc" id="L387">    }</span>
+
+    /**
+     * Mutator and Acccessor Methods
+     */
+
+    /**
+     * Visualise and pretty print S-box position to a grid
+     * @return visual representation of S-box position
+     */
+    public String getVisualSBoxPosition() {
+<span class="nc" id="L398">        String out = &quot;\n-------------\n&quot;;</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">        for (int i = 0; i &lt; position.length; i++) {</span>
+<span class="nc bnc" id="L400" title="All 2 branches missed.">            for (int j = 3; j &gt;= 0; j--) {</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">                if (Helper.getBit(position[i], j) == 1) {</span>
+<span class="nc" id="L402">                    out += &quot;|x &quot;;</span>
+                } else {
+<span class="nc" id="L404">                    out += &quot;|  &quot;;</span>
+                }
+            }
+<span class="nc" id="L407">            out += &quot;|\n-------------\n&quot;;</span>
+        }
+
+<span class="nc" id="L410">        return out;</span>
+    }
+
+    /**
+     * Encode S-box position into a 16-bit binary index
+     * @return 16-bit binary index from S-box position
+     */
+    public int getIndex() {
+<span class="nc" id="L418">        int index = 0;</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">        for (int i = 0; i &lt; position.length; i++) {</span>
+<span class="nc" id="L420">            index &lt;&lt;= 8;</span>
+<span class="nc" id="L421">            index ^= position[i];</span>
+        }
+<span class="nc" id="L423">        return index;</span>
+    }
+
+    /**
+     * Flip bit at a certain position
+     * @param x coordinate x
+     * @param y coordinate y
+     */
+    public void flipBit(int x, int y) {
+<span class="nc" id="L432">        this.position[y] ^= (1 &lt;&lt; x);</span>
+<span class="nc" id="L433">    }</span>
+
+    /**
+     * Return the total number of active S-box
+     * @return total number of active S-box
+     */
+    public int getTotalActiveSBox() {
+<span class="nc" id="L440">        int count = 0;</span>
+<span class="nc bnc" id="L441" title="All 4 branches missed.">        for (int round = 0; (round &lt; this.position.length) &amp;&amp; (this.position[round] != 0); round++) {</span>
+<span class="nc" id="L442">            count += Helper.bitSum(this.position[round]);</span>
+        }
+<span class="nc" id="L444">        return count;</span>
+    }
+
+    public int[] getSBoxPosition() {
+<span class="nc" id="L448">        return this.position;</span>
+    }
+
+    public void setSBoxPosition(int[] pos) {
+<span class="nc" id="L452">        this.position = pos;</span>
+<span class="nc" id="L453">    }</span>
+
+    public void setSBoxPosition(boolean[] pos) {
+<span class="nc" id="L456">        defaultSettings(); // must reset position array to 0</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">        for (int i = 0; i &lt; this.position.length; i++) {</span>
+<span class="nc bnc" id="L458" title="All 2 branches missed.">            for (int j = i*8; j &lt; i*8+8; j++) {</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">                this.position[i] ^= (pos[j] ? 1 : 0);</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">                if (j != i*8+7) this.position[i] &lt;&lt;= 1;</span>
+            }
+        }
+<span class="nc" id="L463">    }</span>
+
+    public long getBestU() {
+<span class="nc" id="L466">        return this.bestU;</span>
+    }
+
+    public long getBestV() {
+<span class="nc" id="L470">        return this.bestV;</span>
+    }
+
+/**
+ * toString() method
+ */
+    // @Override
+    // public String toString() {
+    //     return &quot;{&quot; +
+    //         &quot; position='&quot; + getSBoxPosition() + &quot;'&quot; +
+    //         &quot;, best='&quot; + getBestBias() + &quot;'&quot; +
+    //         &quot;, bestU='&quot; + getBestU() + &quot;'&quot; +
+    //         &quot;, bestV='&quot; + getBestV() + &quot;'&quot; +
+    //         &quot;}&quot;;
+    // }
+
+    public String toStringApproximation() {
+<span class="nc" id="L487">        String out = &quot;&quot;;</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">        for (int i = 0; i &lt; position.length; i++) {</span>
+<span class="nc" id="L489">            out += Integer.toBinaryString(position[i]) + &quot; &quot;;</span>
+        }
+<span class="nc" id="L491">        return out;</span>
+    }
+
+    public String getBest() {
+<span class="nc" id="L495">        return this.outputBest;</span>
+    }
+
+    public double[][] getDDT() {
+<span class="nc" id="L499">        return this.DDT;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

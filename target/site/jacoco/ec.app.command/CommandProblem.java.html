@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommandProblem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.app.command</a> &gt; <span class="el_source">CommandProblem.java</span></div><h1>CommandProblem.java</h1><pre class="source lang-java linenums">package ec.app.command;
+
+import java.lang.ProcessBuilder;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+
+import ec.EvolutionState;
+import ec.Individual;
+import ec.Population;
+import ec.Problem;
+import ec.coevolve.GroupedProblemForm;
+import ec.simple.SimpleFitness;
+import ec.simple.SimpleProblemForm;
+import ec.util.Parameter;
+import ec.vector.DoubleVectorIndividual;
+
+/**
+ * A problem that ferries real-valued genomes out to an external shell command to have their 
+ * fitnesses evaluated.
+ */
+<span class="nc bnc" id="L28" title="All 2 branches missed.">public class CommandProblem extends Problem implements SimpleProblemForm, GroupedProblemForm</span>
+    {
+    private static final long serialVersionUID = 1;
+
+    public final static String P_COMMAND = &quot;command&quot;;
+    public final static String DELIMITER = &quot;,&quot;;
+
+    private ProcessBuilder processBuilder;
+
+    public void setup(final EvolutionState state, final Parameter base)
+        {
+<span class="nc" id="L39">        final String command = state.parameters.getString(base.push(P_COMMAND), null);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (command == null)</span>
+<span class="nc" id="L41">            state.output.fatal(String.format(&quot;%s: no value given for parameter '%s', but we need a command to run.&quot;, this.getClass().getSimpleName(), base.push(P_COMMAND)));</span>
+<span class="nc" id="L42">        this.processBuilder = new ProcessBuilder(command);</span>
+<span class="nc" id="L43">        }</span>
+
+	@Override
+	public void preprocessPopulation(EvolutionState state, Population pop, boolean[] prepareForFitnessAssessment,
+            boolean countVictoriesOnly)
+        {
+		// Do nothing
+<span class="nc" id="L50">	    }</span>
+
+	@Override
+	public int postprocessPopulation(EvolutionState state, Population pop, boolean[] assessFitness,
+            boolean countVictoriesOnly)
+        {
+		// Do nothing
+<span class="nc" id="L57">		return 0;</span>
+	    }
+
+    /**
+     * Evaluate a chunk of individuals by sending them all at once to an external command.
+     * 
+     * @param state The algorithm's state
+     * @param individuals Array of DoubleVectorIndividuals to be evaluated
+     * @param updateFitness Ignored
+     * @param countVictoriesOnly Ignored
+     * @param subpops Ignored
+     * @param threadnum The ID of the thread this job is run on
+     */
+	@Override
+	public void evaluate(EvolutionState state, Individual[] individuals, boolean[] updateFitness, boolean countVictoriesOnly,
+            int[] subpops, int threadnum)
+        {
+<span class="nc bnc" id="L74" title="All 4 branches missed.">        assert(state != null);</span>
+<span class="nc bnc" id="L75" title="All 4 branches missed.">        assert(individuals != null);</span>
+<span class="nc bnc" id="L76" title="All 4 branches missed.">        assert(individuals.length &gt; 0);</span>
+        
+        try
+            {
+<span class="nc" id="L80">            final String simulationResult = runCommand(individuals);</span>
+<span class="nc" id="L81">            final List&lt;Double&gt; fitnesses = parseFitnesses(simulationResult);</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (fitnesses.size() != individuals.length)</span>
+<span class="nc" id="L84">                    throw new IllegalStateException(String.format(&quot;Sent %d individuals to external command, but the returned simulation results had %d lines.&quot;, CommandProblem.class.getSimpleName(), individuals.length, fitnesses.size()));</span>
+                
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            for (int i = 0; i &lt; individuals.length; i++)</span>
+                {
+<span class="nc" id="L88">                final Individual ind = individuals[i];</span>
+<span class="nc" id="L89">                ind.fitness = new SimpleFitness();</span>
+<span class="nc" id="L90">                ((SimpleFitness)ind.fitness).setFitness(state, fitnesses.get(i), false);</span>
+<span class="nc" id="L91">                ind.evaluated = true;</span>
+                }
+            }
+<span class="nc" id="L94">        catch (final Exception e)</span>
+            {
+<span class="nc" id="L96">            state.output.fatal(String.format(&quot;%s: %s&quot;, this.getClass().getSimpleName(), e));</span>
+<span class="nc" id="L97">            }</span>
+<span class="nc" id="L98">	    }</span>
+
+    /** Evaluate a single individual by sending its genome to an external command. */
+	@Override
+    public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum)
+        {
+<span class="nc" id="L104">		evaluate(state, new Individual[] { ind }, null, false, null, threadnum);</span>
+<span class="nc" id="L105">        }</span>
+
+    /**
+     * Run an external program, writing genomes to its stdin and receiving a response String back
+     * on its stdout.
+     * 
+     * We assume that the external program will return exactly the same number of lines of output as
+     * it is given.
+     * 
+     * @param individuals Array of DoubleVectorIndividuals to be sent to the command.
+     * @return The results the command writes back.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private String runCommand(final Individual[] individuals) throws IOException, InterruptedException
+        {
+<span class="nc" id="L121">        processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);</span>
+<span class="nc" id="L122">        final Process p = processBuilder.start();</span>
+
+        // Write genomes to the command's stdin
+<span class="nc" id="L125">        final Writer commandInput = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));</span>
+<span class="nc" id="L126">        writeIndividuals(individuals, commandInput);</span>
+<span class="nc" id="L127">        commandInput.close(); // Sends EOF</span>
+<span class="nc" id="L128">        final int exitCode = p.waitFor();</span>
+
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (exitCode != 0)</span>
+<span class="nc" id="L131">            throw new IllegalStateException(String.format(&quot;External command terminated with exit code %d.&quot;, exitCode));</span>
+
+        // Read the output from the command's stdout
+<span class="nc" id="L134">        final StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L135">        final BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));</span>
+<span class="nc" id="L136">        String line = &quot;&quot;;			</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        while ((line = reader.readLine())!= null) {</span>
+<span class="nc" id="L138">            sb.append(line).append(System.getProperty(&quot;line.separator&quot;));</span>
+        }
+<span class="nc" id="L140">        return sb.toString();</span>
+        }
+    
+    /** Take a list of DoubleVectorIndividuals and output them to a tab-delimited file.
+     * 
+     * @param individuals A non-empty population of Individuals.  If any element is null an IAE is thrown.
+     * @param outWriter A non-null Writer to output the CSV to.  When this method returns it does *not* close the outWriter.
+     * @return Nothing.  Side effects: Writes a tab-delimited CSV to outWriter, one row per individual, one column per gene.
+     * @throws IOException 
+     */
+    public static void writeIndividuals(final Individual[] individuals, final Writer outWriter) throws IOException
+        {
+<span class="nc bnc" id="L152" title="All 4 branches missed.">        assert(outWriter != null);</span>
+<span class="nc bnc" id="L153" title="All 4 branches missed.">        assert(individuals != null);</span>
+<span class="nc bnc" id="L154" title="All 4 branches missed.">        assert(individuals.length &gt; 0);</span>
+        
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        for (final Individual ind : individuals)</span>
+            {
+<span class="nc" id="L158">            final double[] genome = ((DoubleVectorIndividual) ind).genome;</span>
+<span class="nc bnc" id="L159" title="All 4 branches missed.">            assert(genome.length &gt; 0);</span>
+<span class="nc" id="L160">            outWriter.write(String.valueOf(genome[0]));</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">            for (int i = 1; i &lt; genome.length; i++)</span>
+<span class="nc" id="L162">                outWriter.write(String.format(&quot;%s%f&quot;, DELIMITER, genome[i]));</span>
+<span class="nc" id="L163">            outWriter.write(String.format(&quot;%n&quot;));</span>
+            }
+<span class="nc" id="L165">        }</span>
+
+    /**
+     * Parse the String of results that we get back from the external command by
+     * interpreting it as a list of fitness values, one per line.
+     */
+    public static List&lt;Double&gt; parseFitnesses(final String simResult)
+        {
+<span class="nc bnc" id="L173" title="All 2 branches missed.">            if (simResult.isEmpty())</span>
+<span class="nc" id="L174">                throw new IllegalArgumentException(String.format(&quot;%s: response from external fitness command was empty.&quot;, CommandProblem.class.getSimpleName()));</span>
+
+            try {
+<span class="nc" id="L177">                final String[] lines = simResult.split(&quot;\\r?\\n&quot;);  // Split on either Windows or UNIX line endings</span>
+<span class="nc" id="L178">                final List&lt;Double&gt; fitnesses = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                for (final String f : lines)</span>
+                    {
+<span class="nc" id="L181">                    final double realFitness = Double.valueOf(f);</span>
+<span class="nc" id="L182">                    fitnesses.add(realFitness);</span>
+                    }
+<span class="nc" id="L184">                return fitnesses;</span>
+<span class="nc" id="L185">            } catch (Exception e) {</span>
+<span class="nc" id="L186">                throw new IllegalArgumentException(String.format(&quot;%s: error (%s) while parsing fitness response \&quot;%s\&quot;&quot;, CommandProblem.class.getSimpleName(), e, simResult));</span>
+            }
+        }
+    }
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

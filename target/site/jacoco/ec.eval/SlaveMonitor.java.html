@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SlaveMonitor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ecj</a> &gt; <a href="index.source.html" class="el_package">ec.eval</a> &gt; <span class="el_source">SlaveMonitor.java</span></div><h1>SlaveMonitor.java</h1><pre class="source lang-java linenums">/*
+  Copyright 2006 by Sean Luke and George Mason University
+  Licensed under the Academic Free License version 3.0
+  See the file &quot;LICENSE&quot; for more information
+*/
+
+
+package ec.eval;
+
+import ec.*;
+
+import java.io.*;
+import java.util.*;
+import java.net.*;
+import ec.util.*;
+import ec.steadystate.QueueIndividual;
+
+/**
+ * SlaveMonitor.java
+ *
+
+ &lt;P&gt;The SlaveMonitor manages slave connections to each remote slave, and provides synchronization facilities
+ for the slave connections and for various other objects waiting to be notified when new slaves are
+ available, space is available in a slave's job queue, an individual has been completed, etc.
+
+ &lt;p&gt;The monitor provides functions to create and delete slaves (registerSlave(), unregisterSlave()), 
+ schedule a job for evaluation (scheduleJobForEvaluation(...)), block until all jobs have completed
+ (waitForAllSlavesToFinishEvaluating(...)), test if any individual in a job has been finished
+ (evaluatedIndividualAvailable()),  and block until an individual in a job is available and returned
+ (waitForindividual()).
+ 
+ &lt;p&gt;Generally speaking, the SlaveMonitor owns the SlaveConnections -- no one else
+ should speak to them.  Also generally speaking, only MasterProblems create and speak to the SlaveMonitor.
+  
+ * @author Sean Luke, Liviu Panait, and Keith Sullivan
+ * @version 1.0 
+ */
+
+public class SlaveMonitor
+    {
+    public final static String P_EVALNODELAY = &quot;eval.no-delay&quot;;
+
+    public final static String P_EVALSENDBUFER = &quot;eval.send-buffer&quot;;
+
+    public final static String P_EVALRECVBUFFER = &quot;eval.recv-buffer&quot;;
+
+    public static final String P_EVALMASTERPORT = &quot;eval.master.port&quot;;
+    public static final String P_EVALCOMPRESSION = &quot;eval.compression&quot;;
+    public static final String P_MAXIMUMNUMBEROFCONCURRENTJOBSPERSLAVE = &quot;eval.masterproblem.max-jobs-per-slave&quot;;
+    public static final String P_RESCHEDULELOSTJOBS = &quot;eval.masterproblem.reschedule-lost-jobs&quot;;
+    public static final int SEED_INCREMENT = 7919; // a large value (prime for fun) bigger than expected number of threads per slave
+
+    public EvolutionState state;
+    
+    // set to true if slave connections should reschedule jobs before they are
+    // completely shut down due to a lost slave.  We might not want this to
+    // happen if we're doing asynchronous evolution, for example.  Do NOT
+    // set this to true if you're doing generational evolution, it'll just
+    // hang waiting for a (now-un-rescheduled) lost job.
+    boolean rescheduleLostJobs;
+    
+    ThreadPool pool;
+    
+    /** A counter used to give slaves unique numbers so they can construct
+        useful unique names for themselves. */
+<span class="nc" id="L66">    int slaveNum = 0;</span>
+    
+    /**
+     *  The socket where slaves connect.
+     */
+    public ServerSocket servSock;
+        
+    /**
+     * Indicates whether compression is used over the socket IO streams.
+     */
+    public boolean useCompression;
+
+<span class="nc" id="L78">    boolean shutdownInProgress = false;</span>
+<span class="nc" id="L79">    Object[] shutdownInProgressLock = new Object[0];  // arrays are serializable</span>
+<span class="nc" id="L80">    final boolean isShutdownInProgress() { synchronized (shutdownInProgressLock) { return shutdownInProgress; } }</span>
+<span class="nc" id="L81">    final void setShutdownInProgress(boolean val) { synchronized (shutdownInProgressLock) { shutdownInProgress = val; } }</span>
+    
+    int randomSeed;
+    Thread thread;
+
+    public boolean waitOnMonitor(Object monitor)
+        {
+        try
+            {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (Thread.interrupted()) { return false; }</span>
+<span class="nc" id="L91">            else synchronized(monitor)</span>
+                     {
+<span class="nc" id="L93">                     monitor.wait();</span>
+<span class="nc" id="L94">                     }</span>
+            }
+<span class="nc" id="L96">        catch (InterruptedException e) { return false; }</span>
+<span class="nc" id="L97">        return true;</span>
+        }
+
+    public void notifyMonitor(Object monitor)
+        {
+<span class="nc" id="L102">        monitor.notifyAll();</span>
+<span class="nc" id="L103">        }</span>
+
+    // the slaves (not really a queue)
+<span class="nc" id="L106">    LinkedList&lt;SlaveConnection&gt; allSlaves = new LinkedList&lt;&gt;();</span>
+
+    // the available slaves
+<span class="nc" id="L109">    LinkedList&lt;SlaveConnection&gt; availableSlaves = new LinkedList&lt;&gt;();</span>
+
+    // the maximum number of jobs per slave
+    int maxJobsPerSlave;
+
+    // whether the system should display information that is useful for debugging 
+    boolean showDebugInfo;
+    
+    final void debug(String s)
+        {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (showDebugInfo) { System.err.println(Thread.currentThread().getName() + &quot;-&gt;&quot; + s); }</span>
+<span class="nc" id="L120">        }</span>
+    
+    /**
+       Simple constructor that initializes the data structures for keeping track of the state of each slave.
+       The constructor receives two parameters: a boolean flag indicating whether the system should display
+       information that is useful for debugging, and the maximum load per slave (the maximum number of jobs
+       that a slave can be entrusted with at each time).
+    */
+    public SlaveMonitor( final EvolutionState state, boolean showDebugInfo, final MasterProblem problemPrototype)
+<span class="nc" id="L129">        {</span>
+<span class="nc" id="L130">        this.showDebugInfo = showDebugInfo;</span>
+<span class="nc" id="L131">        this.state = state;</span>
+        
+<span class="nc" id="L133">        pool = new ThreadPool();</span>
+                
+<span class="nc" id="L135">        int port = state.parameters.getInt(</span>
+            new Parameter( P_EVALMASTERPORT ),null);
+                
+<span class="nc" id="L138">        maxJobsPerSlave = state.parameters.getInt(</span>
+            new Parameter( P_MAXIMUMNUMBEROFCONCURRENTJOBSPERSLAVE ),null);
+
+<span class="nc" id="L141">        rescheduleLostJobs = state.parameters.getBoolean(new Parameter(P_RESCHEDULELOSTJOBS), null, true);</span>
+
+<span class="nc" id="L143">        useCompression = state.parameters.getBoolean(new Parameter(P_EVALCOMPRESSION),null,false);</span>
+                
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        final int noDelay = state.parameters.exists(new Parameter(P_EVALNODELAY), null) ? </span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        	(state.parameters.getBoolean(new Parameter(P_EVALNODELAY), null, true) ? 1 : 0) : -1;</span>
+
+<span class="nc" id="L148">        final int sendBuffer = state.parameters.getInt(new Parameter(P_EVALSENDBUFER), null, -1); </span>
+<span class="nc" id="L149">        final int recvBuffer = state.parameters.getInt(new Parameter(P_EVALRECVBUFFER), null, -1); </span>
+        
+        try
+            {
+<span class="nc" id="L153">            servSock = new ServerSocket(port);</span>
+            }
+<span class="nc" id="L155">        catch( IOException e )</span>
+            {
+<span class="nc" id="L157">            state.output.fatal(&quot;Unable to bind to port &quot; + port + &quot;: &quot; + e);</span>
+<span class="nc" id="L158">            }</span>
+                
+<span class="nc" id="L160">        randomSeed = (int)(System.currentTimeMillis());</span>
+
+        // spawn the thread
+<span class="nc" id="L163">        thread = new Thread(new Runnable()</span>
+<span class="nc" id="L164">            {</span>
+            public void run()
+                {
+<span class="nc" id="L167">                Thread.currentThread().setName(&quot;SlaveMonitor::    &quot;);</span>
+                Socket slaveSock;
+                        
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                while (!isShutdownInProgress())</span>
+                    {
+<span class="nc" id="L172">                    slaveSock = null;</span>
+<span class="nc bnc" id="L173" title="All 4 branches missed.">                    while( slaveSock==null &amp;&amp; !isShutdownInProgress() )</span>
+                        {
+                        try
+                            {
+<span class="nc" id="L177">                            slaveSock = servSock.accept();</span>
+                            }
+<span class="nc" id="L179">                        catch( IOException e ) { slaveSock = null; }</span>
+                        }
+<span class="nc bnc" id="L181" title="All 2 branches missed.">                    if (slaveSock == null)</span>
+<span class="nc" id="L182">                    	break;</span>
+
+<span class="nc" id="L184">                    debug(Thread.currentThread().getName() + &quot; Slave attempts to connect.&quot; );</span>
+<span class="nc" id="L185">						state.output.systemMessage( &quot; Slave attempts to connect.&quot; );</span>
+
+<span class="nc" id="L187">					Object connection = registerSlave(state, slaveSock, problemPrototype, useCompression, noDelay, sendBuffer, recvBuffer);</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                    if (connection instanceof SlaveConnection)</span>
+<span class="nc" id="L189">                        state.output.systemMessage( &quot;Slave &quot; + ((SlaveConnection)connection).slaveName + &quot; connected successfully.&quot; );</span>
+					else
+<span class="nc" id="L191">						state.output.systemMessage( &quot;Slave &quot; + ((String)connection) + &quot; not permitted to connect.&quot; );</span>
+<span class="nc" id="L192">                    }</span>
+
+<span class="nc" id="L194">                debug( Thread.currentThread().getName() + &quot; The monitor is shutting down.&quot; );</span>
+<span class="nc" id="L195">                }</span>
+            });
+<span class="nc" id="L197">        thread.setDaemon(true);</span>
+<span class="nc" id="L198">        thread.start();</span>
+<span class="nc" id="L199">        }</span>
+
+    /**
+       Registers a new slave with the monitor.  Upon registration, a slave is marked as available for jobs.
+    */
+    public Object registerSlave( EvolutionState state, Socket socket, Problem problemPrototype, boolean useCompression, int noDelay, int sendBuffer, int recvBuffer)
+        {
+		try
+			{
+<span class="nc bnc" id="L208" title="All 2 branches missed.">			if (noDelay == 1)</span>
+				{
+<span class="nc" id="L210">				socket.setTcpNoDelay(true);</span>
+<span class="nc" id="L211">				Output.initialMessage(&quot;NoDelay -&gt; ON&quot;);</span>
+				}
+<span class="nc bnc" id="L213" title="All 2 branches missed.">			else if (noDelay == 0)</span>
+				{
+<span class="nc" id="L215">				socket.setTcpNoDelay(false);</span>
+<span class="nc" id="L216">				Output.initialMessage(&quot;NoDelay -&gt; OFF&quot;);</span>
+				}
+
+<span class="nc bnc" id="L219" title="All 2 branches missed.">			if (sendBuffer &gt;= 0)</span>
+				{
+<span class="nc" id="L221">				Output.initialMessage(&quot;SendBuffer Changed from &quot; + socket.getSendBufferSize() + &quot; to &quot; + sendBuffer);</span>
+<span class="nc" id="L222">				socket.setSendBufferSize(sendBuffer);</span>
+				}
+
+<span class="nc bnc" id="L225" title="All 2 branches missed.">			if (recvBuffer &gt;= 0)</span>
+				{
+<span class="nc" id="L227">				Output.initialMessage(&quot;RecvBuffer Changed from &quot; + socket.getReceiveBufferSize() + &quot; to &quot; + recvBuffer);</span>
+<span class="nc" id="L228">				socket.setReceiveBufferSize(recvBuffer);</span>
+				}
+							
+<span class="nc" id="L231">			DataInputStream dataIn = null;</span>
+<span class="nc" id="L232">			DataOutputStream dataOut = null;</span>
+<span class="nc" id="L233">			InputStream tmpIn = socket.getInputStream();</span>
+<span class="nc" id="L234">			OutputStream tmpOut = socket.getOutputStream();</span>
+			
+			// The first thing we do is send a single byte indicating whether we're using compression or not
+<span class="nc bnc" id="L237" title="All 2 branches missed.">			tmpOut.write((byte)(useCompression ? 1 : 0));</span>
+			
+<span class="nc bnc" id="L239" title="All 2 branches missed.">			if (useCompression)</span>
+				{
+<span class="nc" id="L241">				tmpIn = Output.makeCompressingInputStream(tmpIn);</span>
+<span class="nc" id="L242">				tmpOut = Output.makeCompressingOutputStream(tmpOut);</span>
+<span class="nc bnc" id="L243" title="All 4 branches missed.">				if (tmpIn == null || tmpOut == null)</span>
+<span class="nc" id="L244">					state.output.fatal(&quot;You do not appear to have JZLib installed on your system, and so must set eval.compression=false. &quot; +</span>
+						&quot;To get JZLib, download from the ECJ website or from http://www.jcraft.com/jzlib/&quot;);
+				}
+																				
+<span class="nc" id="L248">			dataIn = new DataInputStream(tmpIn);</span>
+<span class="nc" id="L249">			dataOut = new DataOutputStream(tmpOut);</span>
+
+			// write unique integer
+<span class="nc" id="L252">			dataOut.writeInt(slaveNum++);</span>
+<span class="nc" id="L253">			dataOut.flush();</span>
+
+			// read slave name
+<span class="nc" id="L256">			String slaveName = dataIn.readUTF();</span>
+
+<span class="nc" id="L258">			dataOut.writeInt(randomSeed);</span>
+<span class="nc" id="L259">			randomSeed+=SEED_INCREMENT;</span>
+
+			// write out additional data as necessary
+<span class="nc" id="L262">			problemPrototype.sendAdditionalData(state, dataOut);</span>
+<span class="nc" id="L263">			dataOut.flush();</span>
+		
+<span class="nc bnc" id="L265" title="All 2 branches missed.">			if (isShutdownInProgress())  // no more registrations.  Kill the socket</span>
+				{
+<span class="nc" id="L267">				try { dataOut.writeByte(Slave.V_SHUTDOWN); } catch (Exception e) { }  // exception, not IOException, because JZLib throws some array exceptions</span>
+<span class="nc" id="L268">				try { dataOut.flush(); } catch (Exception e) { }</span>
+<span class="nc" id="L269">				try { dataOut.close(); } catch (Exception e) { }</span>
+<span class="nc" id="L270">				try { dataIn.close(); } catch (Exception e) { }</span>
+<span class="nc" id="L271">				try { socket.close(); } catch (IOException e) { }</span>
+<span class="nc" id="L272">				return slaveName;</span>
+				}
+
+<span class="nc" id="L275">			SlaveConnection newSlave = new SlaveConnection( state, slaveName, socket, dataOut, dataIn, this );</span>
+		
+<span class="nc" id="L277">			synchronized(allSlaves)</span>
+				{
+<span class="nc" id="L279">				allSlaves.addLast(newSlave);</span>
+<span class="nc" id="L280">				notifyMonitor(allSlaves);</span>
+<span class="nc" id="L281">				}</span>
+<span class="nc" id="L282">			synchronized(availableSlaves)</span>
+				{
+<span class="nc" id="L284">				availableSlaves.addLast(newSlave);</span>
+<span class="nc" id="L285">				notifyMonitor(availableSlaves);</span>
+<span class="nc" id="L286">				}</span>
+<span class="nc" id="L287">			return newSlave;</span>
+			}
+<span class="nc" id="L289">		catch (IOException ex)</span>
+			{
+<span class="nc" id="L291">			System.err.println(ex);</span>
+<span class="nc" id="L292">			return &quot;UNKNOWN&quot;;</span>
+			}
+        
+        }
+
+    /**
+       Unregisters a dead slave from the monitor.
+    */
+    public void unregisterSlave( SlaveConnection slave )
+        {
+<span class="nc" id="L302">        synchronized(allSlaves)</span>
+            {
+<span class="nc bnc" id="L304" title="All 2 branches missed.">            if (allSlaves.contains(slave))  // could have been removed if shutdown is in progress</span>
+                {
+<span class="nc" id="L306">                allSlaves.remove(slave);</span>
+<span class="nc" id="L307">                notifyMonitor(allSlaves);</span>
+                }
+<span class="nc" id="L309">            }</span>
+<span class="nc" id="L310">        synchronized(availableSlaves)</span>
+            {
+<span class="nc bnc" id="L312" title="All 2 branches missed.">            if (availableSlaves.contains(slave))  // could have been removed if shutdown is in progress</span>
+                {
+<span class="nc" id="L314">                availableSlaves.remove(slave);</span>
+<span class="nc" id="L315">                notifyMonitor(availableSlaves);</span>
+                }
+<span class="nc" id="L317">            }</span>
+<span class="nc" id="L318">        }</span>
+
+    /**
+       Shuts down the slave monitor (also shuts down all slaves).
+    */
+    public void shutdown()
+        {
+        // kill the socket socket and bring down the thread
+<span class="nc" id="L326">        setShutdownInProgress(true);</span>
+        try
+            {
+<span class="nc" id="L329">            servSock.close();</span>
+            }
+<span class="nc" id="L331">        catch (IOException e)</span>
+            {
+<span class="nc" id="L333">            }</span>
+<span class="nc" id="L334">        thread.interrupt();</span>
+<span class="nc" id="L335">        try { thread.join(); }</span>
+<span class="nc" id="L336">        catch (InterruptedException e) { }</span>
+        
+<span class="nc" id="L338">        debug(&quot;Main Monitor Thread Shut Down&quot;);</span>
+        // gather all the slaves
+        
+        while(true)
+            {
+<span class="nc" id="L343">            SlaveConnection sc = null;</span>
+<span class="nc" id="L344">            synchronized(allSlaves)</span>
+                {
+<span class="nc bnc" id="L346" title="All 2 branches missed.">                if (allSlaves.isEmpty()) break;</span>
+<span class="nc" id="L347">                sc = (SlaveConnection)(allSlaves.removeFirst());</span>
+<span class="nc" id="L348">                }</span>
+<span class="nc" id="L349">            debug(&quot;Shutting Down Slave&quot; + sc);</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">            if (sc != null) </span>
+<span class="nc" id="L351">                sc.shutdown(state);  // it better not be null!</span>
+<span class="nc" id="L352">            debug(&quot;Shut Down Slave&quot; + sc);</span>
+<span class="nc" id="L353">            }</span>
+<span class="nc" id="L354">        synchronized(allSlaves)</span>
+            {
+<span class="nc" id="L356">            notifyMonitor(allSlaves);</span>
+<span class="nc" id="L357">            }</span>
+
+<span class="nc" id="L359">        pool.killAll();  // clean up the thread pool</span>
+<span class="nc" id="L360">        debug(&quot;Shut Down Completed&quot;);</span>
+<span class="nc" id="L361">        }</span>
+
+    /**
+       Schedules a job for execution on one of the available slaves.  The monitor waits until at least one
+       slave is available to perform the job.
+    */
+    public void scheduleJobForEvaluation( final EvolutionState state, Job job )
+        {
+<span class="nc bnc" id="L369" title="All 2 branches missed.">        if (isShutdownInProgress()) return;  // no more jobs allowed.  This line rejects requests from slaveConnections when THEY'RE shutting down.</span>
+        
+<span class="nc" id="L371">        SlaveConnection result = null;</span>
+<span class="nc" id="L372">        synchronized(availableSlaves)</span>
+            {
+            while( true)
+                {
+<span class="nc bnc" id="L376" title="All 2 branches missed.">                if (!availableSlaves.isEmpty()) </span>
+                    {
+<span class="nc" id="L378">                    result = (SlaveConnection)(availableSlaves.removeFirst());</span>
+<span class="nc" id="L379">                    break;</span>
+                    }
+<span class="nc" id="L381">                debug(&quot;Waiting for an available slave.&quot; );</span>
+<span class="nc" id="L382">                waitOnMonitor(availableSlaves);</span>
+                }
+<span class="nc" id="L384">            notifyMonitor(availableSlaves);</span>
+<span class="nc" id="L385">            }       </span>
+<span class="nc" id="L386">        debug( &quot;Got a slave available for work.&quot; );</span>
+
+<span class="nc" id="L388">        result.scheduleJob(job);</span>
+
+<span class="nc bnc" id="L390" title="All 2 branches missed.">        if( result.numJobs() &lt; maxJobsPerSlave )</span>
+            {
+<span class="nc" id="L392">            synchronized(availableSlaves) </span>
+                {
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                if( !availableSlaves.contains(result)) availableSlaves.addLast(result);  // so we're round-robin</span>
+<span class="nc" id="L395">                notifyMonitor(availableSlaves);</span>
+<span class="nc" id="L396">                }</span>
+            }
+<span class="nc" id="L398">        }</span>
+
+    /**
+       This method returns only when all slaves have finished the jobs that they were assigned.  While this method waits,
+       new jobs can be assigned to the slaves.  This method is usually invoked from MasterProblem.finishEvaluating.  You
+       should not abuse using this method: if there are two evaluation threads, where one of them waits until all jobs are
+       finished, while the second evaluation thread keeps posting jobs to the slaves, the first thread might have to wait
+       until the second thread has had all its jobs finished.
+    */
+    public void waitForAllSlavesToFinishEvaluating( final EvolutionState state )
+        {
+<span class="nc" id="L409">        synchronized(allSlaves)</span>
+            {
+<span class="nc" id="L411">            Iterator&lt;SlaveConnection&gt; iter = allSlaves.iterator();</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">            while( iter.hasNext() )</span>
+                {
+<span class="nc" id="L414">                SlaveConnection slaveConnection = iter.next();</span>
+<span class="nc" id="L415">                try { slaveConnection.dataOut.flush(); } catch (java.io.IOException e) {} // we'll catch this error later....</span>
+<span class="nc" id="L416">                }</span>
+<span class="nc" id="L417">            notifyMonitor(allSlaves);</span>
+<span class="nc" id="L418">            }</span>
+            
+<span class="nc" id="L420">        boolean shouldCycle = true;</span>
+<span class="nc" id="L421">        synchronized(allSlaves)</span>
+            {
+<span class="nc bnc" id="L423" title="All 2 branches missed.">            while( shouldCycle )</span>
+                {
+<span class="nc" id="L425">                shouldCycle = false;</span>
+<span class="nc" id="L426">                Iterator&lt;SlaveConnection&gt; iter = allSlaves.iterator();</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">                while( iter.hasNext() )</span>
+                    {
+<span class="nc" id="L429">                    SlaveConnection slaveConnection = iter.next();</span>
+<span class="nc" id="L430">                    int jobs = slaveConnection.numJobs();</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">                    if( jobs != 0 )</span>
+                        {
+<span class="nc" id="L433">                        debug(&quot;Slave &quot; + slaveConnection + &quot; has &quot; + jobs + &quot; more jobs to finish.&quot; );</span>
+<span class="nc" id="L434">                        shouldCycle = true;</span>
+<span class="nc" id="L435">                        break;</span>
+                        }                               
+<span class="nc" id="L437">                    }</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">                if( shouldCycle )</span>
+                    {
+<span class="nc" id="L440">                    debug(&quot;Waiting for slaves to finish their jobs.&quot; );</span>
+<span class="nc" id="L441">                    waitOnMonitor(allSlaves);</span>
+<span class="nc" id="L442">                    debug(&quot;At least one job has been finished.&quot; );</span>
+                    }
+<span class="nc" id="L444">                }</span>
+<span class="nc" id="L445">            notifyMonitor(allSlaves);</span>
+<span class="nc" id="L446">            }</span>
+<span class="nc" id="L447">        debug(&quot;All slaves have finished their jobs.&quot; );</span>
+<span class="nc" id="L448">        }</span>
+
+    /**
+       Notifies the monitor that the particular slave has finished performing a job, and it (probably) is
+       available for other jobs.
+    */
+    void notifySlaveAvailability( SlaveConnection slave, final Job job, EvolutionState state )
+        {
+        // first announce that a slave in allSlaves has finished, so people blocked on waitForAllSlavesToFinishEvaluating
+        // can wake up and realize it.
+        
+<span class="nc" id="L459">        synchronized(allSlaves)</span>
+            {
+<span class="nc" id="L461">            notifyMonitor(allSlaves);</span>
+<span class="nc" id="L462">            }</span>
+
+        // now announce that we've got a new available slave if someone wants it
+        
+<span class="nc bnc" id="L466" title="All 2 branches missed.">        if( slave.numJobs() &lt; maxJobsPerSlave )</span>
+            {
+<span class="nc" id="L468">            synchronized(availableSlaves)</span>
+                { 
+<span class="nc bnc" id="L470" title="All 2 branches missed.">                if( !availableSlaves.contains(slave)) availableSlaves.addLast(slave);</span>
+<span class="nc" id="L471">                notifyMonitor(availableSlaves);</span>
+<span class="nc" id="L472">                }</span>
+            }
+
+<span class="nc" id="L475">        debug(&quot;Notify the monitor that the slave is available.&quot; );</span>
+
+        // now announce that we've got a new completed individual if someone is waiting for it
+
+<span class="nc bnc" id="L479" title="All 2 branches missed.">        if( state instanceof ec.steadystate.SteadyStateEvolutionState )</span>
+            {
+            // Perhaps we should the individuals by fitness first, so the fitter ones show up later
+            // and don't get immediately wiped out by less fit ones.  Or should it be the other way
+            // around?  We might revisit that in the future.
+            
+            // At any rate, add ALL the individuals that came back to the evaluatedIndividuals LinkedList
+<span class="nc" id="L486">            synchronized(evaluatedIndividuals)</span>
+                {
+<span class="nc bnc" id="L488" title="All 2 branches missed.">                for(int x=0; x&lt;job.inds.length;x++)</span>
+<span class="nc" id="L489">                    evaluatedIndividuals.addLast( new QueueIndividual(job.inds[x], job.subPops[x]) );</span>
+<span class="nc" id="L490">                notifyMonitor(evaluatedIndividuals);</span>
+<span class="nc" id="L491">                }</span>
+            }
+<span class="nc" id="L493">        }</span>
+
+<span class="nc" id="L495">    LinkedList&lt;QueueIndividual&gt; evaluatedIndividuals =  new LinkedList&lt;&gt;();</span>
+
+    public boolean evaluatedIndividualAvailable()
+        {
+<span class="nc" id="L499">        synchronized(evaluatedIndividuals)</span>
+            {
+<span class="nc" id="L501">            try { evaluatedIndividuals.getFirst(); return true; }</span>
+<span class="nc" id="L502">            catch (NoSuchElementException e) { return false; }</span>
+            }
+        }
+
+
+    /** Blocks until an individual comes available */
+    public QueueIndividual waitForIndividual()
+        {
+        while(true)
+            {
+<span class="nc" id="L512">            synchronized(evaluatedIndividuals)</span>
+                {
+<span class="nc bnc" id="L514" title="All 2 branches missed.">                if (evaluatedIndividualAvailable())</span>
+<span class="nc" id="L515">                    return (QueueIndividual)(evaluatedIndividuals.removeFirst());</span>
+
+<span class="nc" id="L517">                debug(&quot;Waiting for individual to be evaluated.&quot; );</span>
+<span class="nc" id="L518">                waitOnMonitor(evaluatedIndividuals);  // lets go of evaluatedIndividuals loc</span>
+<span class="nc" id="L519">                debug(&quot;At least one individual has been finished.&quot; );</span>
+<span class="nc" id="L520">                }</span>
+            }
+        }
+
+    /** Returns the number of available slave (not busy) */ 
+    int numAvailableSlaves()
+        {
+<span class="nc" id="L527">        int i = 0;</span>
+<span class="nc" id="L528">        synchronized(availableSlaves) { i = availableSlaves.size(); }</span>
+<span class="nc" id="L529">        return i;</span>
+        }
+
+    /**
+     * @param s checkpoint file output stream
+     * @throws IOException
+     */
+    void writeObject(ObjectOutputStream out) throws IOException
+        {
+<span class="nc" id="L538">        state.output.fatal(&quot;Not implemented yet: SlaveMonitor.writeObject&quot;);</span>
+<span class="nc" id="L539">        }</span>
+        
+    /**
+     * @param s checkpoint file input stream.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
+        {
+<span class="nc" id="L548">        state.output.fatal(&quot;Not implemented yet: SlaveMonitor.readObject&quot;);</span>
+<span class="nc" id="L549">        }</span>
+    }
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

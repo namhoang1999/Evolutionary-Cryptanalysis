@@ -1,0 +1,124 @@
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+data: 0 | 105425 1000000000000001100010 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+data: 2 | 74906 1000100010000000001 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+data: 4 | 32774 10100000010000100 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+data: 3 | 111304 100000000001000100000000010 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+data: 4 | 160059 11000000000000000000100010 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+data: 8 | 2959 10000000000000010001000 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+data: 4 | 66705 11000100000000000000010 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+data: 7 | 87440 1000100000000100000000000001 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+data: 3 | 22912 1000000000100000010000 6.666666666666666E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+data: 5 | 37544 110100000000000001 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+data: 8 | 173447 100000010000010001000 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+data: 2 | 87069 10000000100000010000010 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+data: 8 | 36480 1000001100000000000000010 3.333333333333333E-4
+data: 8 | 126368 100000010000000010000 6.666666666666666E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+data: 1 | 68463 100000100000000001001000 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+data: 3 | 33937 10000000100000010010000 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+data: 5 | 13404 1000000000000100001 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+data: 0 | 32119 101010000010000000 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+data: 2 | 140018 10000000010000010100 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+data: 5 | 28062 1000010000000000000000101000 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data0.txt 3000
+data: 0 | 196120 1000000000001000010100000 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data1.txt 3000
+data: 1 | 9615 100000000000000010011000 3.333333333333333E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data2.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data3.txt 3000
+data: 3 | 85452 10100000000000010000 6.666666666666666E-4
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data4.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data5.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data6.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data7.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data8.txt 3000
+Reading from: C:/Users/sdipp/OneDrive/Desktop/Nam/Java/ecj/ecj/data/5-round/data9.txt 3000
+8.333333333333332E-5

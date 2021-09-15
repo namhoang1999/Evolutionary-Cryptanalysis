@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="ec.app.bbob.BBOBenchmarksTest" time="2.26" tests="70" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="java.vm.version" value="15.0.1+9-18"/>
+    <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-15.0.1\bin"/>
+    <property name="maven.multiModuleProjectDirectory" value="C:\Users\sdipp\OneDrive\Desktop\Nam\Dissertation\ecj"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="guice.disable.misplaced.annotation.check" value="true"/>
+    <property name="path.separator" value=";"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="user.script" value=""/>
+    <property name="user.country" value="GB"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="user.dir" value="C:\Users\sdipp\OneDrive\Desktop\Nam\Dissertation\ecj"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="java.runtime.version" value="15.0.1+9-18"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.io.tmpdir" value="C:\Users\sdipp\AppData\Local\Temp\"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="user.variant" value=""/>
+    <property name="os.name" value="Windows 10"/>
+    <property name="classworlds.conf" value="C:\Program Files\apache-maven-3.6.3\bin\..\bin\m2.conf"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk-15.0.1\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;C:\Users\sdipp\AppData\Local\Programs\Python\Python39\Scripts\;C:\Users\sdipp\AppData\Local\Programs\Python\Python39\;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Git\cmd;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Users\sdipp\AppData\Local\Microsoft\WindowsApps;C:\Users\sdipp\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\sdipp\AppData\Local\GitHubDesktop\bin;C:\Program Files\apache-maven-3.6.3\bin;C:\Program Files\nodejs\;C:\Users\sdipp\AppData\Roaming\npm;."/>
+    <property name="maven.conf" value="C:\Program Files\apache-maven-3.6.3\bin\../conf"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="java.class.version" value="59.0"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="os.version" value="10.0"/>
+    <property name="library.jansi.path" value="C:\Program Files\apache-maven-3.6.3\bin\..\lib\jansi-native"/>
+    <property name="user.home" value="C:\Users\sdipp"/>
+    <property name="user.timezone" value="Europe/London"/>
+    <property name="file.encoding" value="Cp1252"/>
+    <property name="java.specification.version" value="15"/>
+    <property name="user.name" value="sdipp"/>
+    <property name="java.class.path" value="C:\Program Files\apache-maven-3.6.3\bin\..\boot\plexus-classworlds-2.6.0.jar"/>
+    <property name="java.vm.specification.version" value="15"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="sun.java.command" value="org.codehaus.plexus.classworlds.launcher.Launcher clean package"/>
+    <property name="java.home" value="C:\Program Files\Java\jdk-15.0.1"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="java.version" value="15.0.1"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="sun.stderr.encoding" value="cp437"/>
+    <property name="maven.home" value="C:\Program Files\apache-maven-3.6.3\bin\.."/>
+    <property name="file.separator" value="\"/>
+    <property name="java.version.date" value="2020-10-20"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="sun.stdout.encoding" value="cp437"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+  </properties>
+  <testcase name="testGallagherGaussian21HI" classname="ec.app.bbob.BBOBenchmarksTest" time="0.127"/>
+  <testcase name="testLunacekPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.008"/>
+  <testcase name="testLunacekPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.003"/>
+  <testcase name="testSchaffersF7" classname="ec.app.bbob.BBOBenchmarksTest" time="0.053"/>
+  <testcase name="testWeierstrass" classname="ec.app.bbob.BBOBenchmarksTest" time="0.097"/>
+  <testcase name="testSharpRidgePointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.003"/>
+  <testcase name="testSharpRidgePointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testGallagherGaussian101MEPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.003"/>
+  <testcase name="testWeierstrassPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testWeierstrassPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testEllipsoidal" classname="ec.app.bbob.BBOBenchmarksTest" time="0.049"/>
+  <testcase name="tesGallagherGaussian101MEPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testSpherePointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testSpherePointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testRosenbrockRotated" classname="ec.app.bbob.BBOBenchmarksTest" time="0.04"/>
+  <testcase name="testRosenbrockPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testRosenbrockPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testAttractiveSector" classname="ec.app.bbob.BBOBenchmarksTest" time="0.074"/>
+  <testcase name="tesGallagherGaussian21HIPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testGallagherGaussian101ME" classname="ec.app.bbob.BBOBenchmarksTest" time="0.529"/>
+  <testcase name="testSchaffersF72" classname="ec.app.bbob.BBOBenchmarksTest" time="0.042"/>
+  <testcase name="testRastriginPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testRastriginPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testSchwefelPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testSchwefelPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.002"/>
+  <testcase name="testEllipsoidal2" classname="ec.app.bbob.BBOBenchmarksTest" time="0.061"/>
+  <testcase name="testEllipsoidalPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.003"/>
+  <testcase name="testEllipsoidalPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.004"/>
+  <testcase name="testDifferentPowers" classname="ec.app.bbob.BBOBenchmarksTest" time="0.068"/>
+  <testcase name="testSchwefel" classname="ec.app.bbob.BBOBenchmarksTest" time="0.061"/>
+  <testcase name="testLunacek" classname="ec.app.bbob.BBOBenchmarksTest" time="0.158"/>
+  <testcase name="testRastrigin" classname="ec.app.bbob.BBOBenchmarksTest" time="0.04"/>
+  <testcase name="testDiscusPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testDiscusPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testEllipsoidal2PointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testEllipsoidal2PointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testGriewankRosenbrockPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testGriewankRosenbrockPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testRosenbrock" classname="ec.app.bbob.BBOBenchmarksTest" time="0.044"/>
+  <testcase name="testEvaluate" classname="ec.app.bbob.BBOBenchmarksTest" time="0.04"/>
+  <testcase name="testRastrigin2" classname="ec.app.bbob.BBOBenchmarksTest" time="0.141"/>
+  <testcase name="testKatsuuraPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testSchaffersF7PointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testSchaffersF7PointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testStepEllipsoidalPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testStepEllipsoidalPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="tesKatsuuraPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testBucheRastriginPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testBucheRastriginPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testRosenbrockRotatedPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testRosenbrockRotatedPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testDiscus" classname="ec.app.bbob.BBOBenchmarksTest" time="0.039"/>
+  <testcase name="testGriewankRosenbrock" classname="ec.app.bbob.BBOBenchmarksTest" time="0.04"/>
+  <testcase name="testAttractiveSectorPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testAttractiveSectorPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testRastrigin2PointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testRastrigin2PointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testLinearSlope" classname="ec.app.bbob.BBOBenchmarksTest" time="0.224"/>
+  <testcase name="testSchaffersF72PointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testSchaffersF72PointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testBentCigar" classname="ec.app.bbob.BBOBenchmarksTest" time="0.039"/>
+  <testcase name="testGallagherGaussian21HIMEPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testStepEllipsoidal" classname="ec.app.bbob.BBOBenchmarksTest" time="0.037"/>
+  <testcase name="testKatsuura" classname="ec.app.bbob.BBOBenchmarksTest" time="0.092"/>
+  <testcase name="testBucheRastrigin" classname="ec.app.bbob.BBOBenchmarksTest" time="0.031"/>
+  <testcase name="testDifferentPowersPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+  <testcase name="testDifferentPowersPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0.004"/>
+  <testcase name="testSharpRidge" classname="ec.app.bbob.BBOBenchmarksTest" time="0.064"/>
+  <testcase name="testBentCigarPointOne" classname="ec.app.bbob.BBOBenchmarksTest" time="0.001"/>
+  <testcase name="testBentCigarPointTwo" classname="ec.app.bbob.BBOBenchmarksTest" time="0"/>
+</testsuite>

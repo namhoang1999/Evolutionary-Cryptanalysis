@@ -1,0 +1,150 @@
+# Copyright 2006 by Sean Luke and George Mason University
+# Licensed under the Academic Free License version 3.0
+# See the file "LICENSE" for more information
+
+parent.0 = ../../gp/koza/koza.params
+
+# Basic tweaks
+# Population size
+pop.subpop.0.size = 2048
+# num of generations
+generations	= 101
+# Elitism - number of best individuals keep for next generation 
+#breed.elite.0 = 10
+
+# 90/10 crossover mutation rate
+pop.subpop.0.species.pipe.source.0 = ec.gp.koza.CrossoverPipeline
+pop.subpop.0.species.pipe.source.0.prob = 0.7
+pop.subpop.0.species.pipe.source.1 = ec.gp.koza.MutationPipeline
+pop.subpop.0.species.pipe.source.1.prob = 0.3
+
+gp.tree.print-style = latex
+
+pop.subpop.0.species.ind.numtrees = 3
+
+# "The result-producing branch" (Koza-II p. 245)
+pop.subpop.0.species.ind.tree.0 = ec.gp.GPTree
+pop.subpop.0.species.ind.tree.0.tc = tc0
+# "ADF0 body" (Koza-II p. 245)
+pop.subpop.0.species.ind.tree.1 = ec.gp.GPTree
+pop.subpop.0.species.ind.tree.1.tc = tc1
+# "ADF1 body" (Koza-II p. 245)
+pop.subpop.0.species.ind.tree.2 = ec.gp.GPTree
+pop.subpop.0.species.ind.tree.2.tc = tc2
+
+# Now, let's define what tc0, tc1, and tc2 are.
+# Each has a different function set, f0, f1, and f2
+
+gp.tc.size = 3
+
+gp.tc.0 = ec.gp.GPTreeConstraints
+gp.tc.0.name = tc0
+gp.tc.0.fset = f0
+gp.tc.0.returns = nil
+gp.tc.0.init = ec.gp.koza.HalfBuilder
+gp.tc.0.init.growp = 0.5
+gp.tc.0.init.min = 2
+gp.tc.0.init.max = 6
+
+gp.tc.1 = ec.gp.GPTreeConstraints
+gp.tc.1.name = tc1
+gp.tc.1.fset = f1
+gp.tc.1.returns = nil
+gp.tc.1.init = ec.gp.koza.HalfBuilder
+gp.tc.1.init.growp = 0.5
+gp.tc.1.init.min = 2
+gp.tc.1.init.max = 6
+
+gp.tc.2 = ec.gp.GPTreeConstraints
+gp.tc.2.name = tc2
+gp.tc.2.fset = f2
+gp.tc.2.returns = nil
+gp.tc.2.init = ec.gp.koza.HalfBuilder
+gp.tc.2.init.growp = 0.5
+gp.tc.2.init.min = 2
+gp.tc.2.init.max = 6
+
+# We have one function set, of class GPFunctionSet
+gp.fs.size = 3
+
+gp.fs.0 = ec.gp.GPFunctionSet
+# We'll call the function set "f0".
+gp.fs.0.name = f0
+
+# We have five functions in the function set.  They are:
+gp.fs.0.size = 8
+gp.fs.0.func.0 = ec.app.gpevolve.dc.terminals.PositionERC
+gp.fs.0.func.0.nc = nc0
+gp.fs.0.func.1 = ec.app.gpevolve.dc.terminals.Flip
+gp.fs.0.func.1.nc = nc0
+gp.fs.0.func.2 = ec.app.gpevolve.dc.internals.NextPosition
+gp.fs.0.func.2.nc = nc1
+gp.fs.0.func.3 = ec.app.gpevolve.dc.internals.NextRound
+gp.fs.0.func.3.nc = nc1
+gp.fs.0.func.4 = ec.app.gpevolve.dc.internals.Progn2
+gp.fs.0.func.4.nc = nc2
+gp.fs.0.func.5 = ec.app.gpevolve.dc.internals.Frog
+gp.fs.0.func.5.nc = nc1
+
+gp.fs.0.func.6 = ec.gp.ADF
+gp.fs.0.func.6.nc = nc0
+# tree 1 (the "ADF0 body")
+gp.fs.0.func.6.tree = 1
+gp.fs.0.func.6.name = ADF0
+
+gp.fs.0.func.7 = ec.gp.ADF
+gp.fs.0.func.7.nc = nc1
+# tree 1 (the "ADF1 body")
+gp.fs.0.func.7.tree = 2
+gp.fs.0.func.7.name = ADF1
+
+
+# ADF0
+gp.fs.1 = ec.gp.GPFunctionSet
+gp.fs.1.name = f1
+gp.fs.1.size = 5
+gp.fs.1.func.0 = ec.app.gpevolve.dc.terminals.PositionERC
+gp.fs.1.func.0.nc = nc0
+gp.fs.1.func.1 = ec.app.gpevolve.dc.terminals.Flip
+gp.fs.1.func.1.nc = nc0
+gp.fs.1.func.2 = ec.app.gpevolve.dc.internals.NextPosition
+gp.fs.1.func.2.nc = nc1
+gp.fs.1.func.3 = ec.app.gpevolve.dc.internals.NextRound
+gp.fs.1.func.3.nc = nc1
+gp.fs.1.func.4 = ec.app.gpevolve.dc.internals.Progn2
+gp.fs.1.func.4.nc = nc2
+#gp.fs.1.func.5 = ec.app.gpevolve.dc.internals.Frog
+#gp.fs.1.func.5.nc = nc1
+
+# ADF1
+gp.fs.2 = ec.gp.GPFunctionSet
+gp.fs.2.name = f2
+gp.fs.2.size = 6
+gp.fs.2.func.0 = ec.app.gpevolve.dc.terminals.PositionERC
+gp.fs.2.func.0.nc = nc0
+gp.fs.2.func.1 = ec.app.gpevolve.dc.terminals.Flip
+gp.fs.2.func.1.nc = nc0
+gp.fs.2.func.2 = ec.app.gpevolve.dc.internals.Progn2
+gp.fs.2.func.2.nc = nc2
+gp.fs.2.func.3 = ec.app.gpevolve.dc.internals.Frog
+gp.fs.2.func.3.nc = nc1
+
+gp.fs.2.func.4 = ec.gp.ADFArgument
+gp.fs.2.func.4.nc = nc0
+gp.fs.2.func.4.name = ARG0
+# argument 0 of the calling ADF ("ADF1")
+gp.fs.2.func.4.arg = 0
+
+gp.fs.2.func.5 = ec.gp.ADF
+gp.fs.2.func.5.nc = nc0
+# tree 1 (the "ADF0 body")
+gp.fs.2.func.5.tree = 1
+gp.fs.2.func.5.name = ADF0
+
+
+eval.problem = ec.app.gpevolve.dc.Differential
+eval.problem.data = ec.app.gpevolve.dc.DifferentialData
+eval.problem.x = 3
+
+
+

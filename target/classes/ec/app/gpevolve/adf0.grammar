@@ -1,0 +1,3 @@
+<start> ::= <op>
+<op> ::= (NextPosition <op>) | (NextRound <op>) | (Progn2 <op> <op>) 
+<op> ::= (PositionERC) | (Flip) 
